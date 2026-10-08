@@ -113,7 +113,7 @@
   <!-- End Style Part -->
   <!-- Start Script Part -->
   <script class="Pagination">
-   document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
         const items = document.querySelectorAll('.page-item');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -124,15 +124,15 @@
         const totalPages = Math.ceil(items.length / itemsPerPage);
 
         function showPage(page) {
-        currentPage = page;
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
+                currentPage = page;
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
 
-        items.forEach((item, index) => {
-        if (index >= start && index < end) {
-                item.classList.add('active');
-        } else {
-                item.classList.remove('active');
+                items.forEach((item, index) => {
+                if (index >= start && index < end) {
+                        item.classList.add('active');
+                } else {
+                        item.classList.remove('active');
         }
         });
 
@@ -152,7 +152,34 @@
 
         // Initialize first page view
         showPage(1);
-        });
+});
+        
+
+  </script>
+  <script class="hotkeys">      
+        
+        // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+
   </script>
   <script class="Audio-player">
    document.addEventListener('DOMContentLoaded', () => {
@@ -250,7 +277,9 @@
             .find("div.in-sentences")
             .toggle();
         });
+}
   </script>
+
   <!-- End: Script Part -->
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
