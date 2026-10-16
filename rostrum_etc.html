@@ -1,0 +1,2615 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Start: Style Part -->
+  <style class="Pagination">
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    div.pagination-controls {
+        width: 100% !important;
+        font-size: 1 rem !important;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        padding-right: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1000; /* Keeps it above other elements */
+     }
+
+   #prev-btn, #next-btn {
+        width: 25%;
+        height: 60px;
+        border-radius: 8px;
+        background-color: darkgreen;
+   }
+
+   #page-indicator {
+        display: inline-block;
+        padding-left: 10%;
+        text-align:center;
+        margin-left: auto;
+        margin-right: auto;
+   }
+
+   #next-btn {
+        margin-left: auto; /* 下一页按钮靠右对齐*/
+   }
+
+   .page-item {
+        display: none;  /* Hide all items by default */
+    }
+
+   .page-item.active {
+        display: block; /* Only show items belonging to the active page */
+        height: 100% !important;
+    }
+  </style>
+  <style class="Heading">
+   h1 {
+          width: 100% !important;
+          max-height: fit-content  !important;
+          padding: 2rem !important;
+          margin-bottom: 12px !important;
+          margin-top: 36px !important;
+          font-size: 3rem  !important;
+          background-color: darkgreen;
+          border-radius: 8px;
+        }
+  </style>
+  <style class="collapse-Expand">
+   details {
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            padding: 10px !important;
+            background: #012344;
+            margin-top:24px !important;
+        }
+
+        summary {
+            font-size:1rem !important;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            margin-left:12px !important;
+        }
+  </style>
+  <style class="audio-player">
+   .audio-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    margin-bottom: 12px;
+                    margin-top: 12px;
+                    padding: 1px 1px;
+                    border-radius: 12px;
+                    max-width: 100%;
+            }
+
+        .custom-play-btn {
+                height: 60px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+  </style>
+  <!-- End Style Part -->
+  <!-- Start Script Part -->
+  <script class="Pagination">
+   document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('.page-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 1;
+        const itemsPerPage = 1; // Change this to how many items you want per page
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        function showPage(page) {
+
+        if(page>totalPages){page=1};// 循环
+        currentPage = page;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        items.forEach((item, index) => {
+        if (index >= start && index < end) {
+                item.classList.add('active');
+                item.getElementsByTagName("audio")[0].play();
+        } else {
+                item.classList.remove('active');
+        }
+        });
+
+        // Update indicator and button states
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) showPage(currentPage + 1);
+        });
+
+        // Initialize first page view
+        showPage(1);
+
+        });
+  </script>
+  <script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+  <script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.textContent = '⏸ Pause';
+          } else {
+            audio.pause();
+            btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          btn.textContent = '▶ Play';
+        });
+      });
+    });
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+  </script>
+  <script class="autocontrol">
+   $(document).ready(function() {
+    // When the HTML document has finished loading,
+    // set the opacity of all <h1> elements with class "hword" to 1 (fully visible).
+    $("h1.hword").css("opacity", "1");
+
+    // Set the opacity of all <em> elements to 1 (fully visible).
+    $("em").css("opacity", "1");
+
+    // Add a click event handler to every <h1 class="hword"> element.
+    $("h1.hword").click(function() {
+
+    // Make the clicked <h1> fully visible.
+    $(this).css("opacity", "1");
+
+    // Starting from the clicked <h1>, find its parent elements
+    // until reaching elements with class "outer-container",
+    // then find <em> elements inside those containers
+    // and make them fully visible.
+    $(this)
+        .parents(".outer-container")
+        .find("em")
+        .css("opacity", "1");
+    });
+
+
+    // Find every <div class="example_sentences">.
+    // For each one, go to its parent element and hide
+    // any <div class="on-web"> inside that parent.
+    $("div.example_sentences")
+        .parent()
+        .find("div.on-web")
+        .hide();
+
+    // Similarly, hide any <div class="in-sentences">
+    // inside the parent of each example_sentences element.
+    $("div.example_sentences")
+        .parent()
+        .find("div.in-sentences")
+        .hide();
+
+    // Add a double-click event handler to every
+    // <div class="example_sentences"> element.
+    $("div.example_sentences").dblclick(function() {
+
+        // When the example sentences are double-clicked,
+        // toggle the visibility of <div class="on-web">
+        // inside the same parent element.
+        //
+        // "toggle()" means:
+        //   visible -> hidden
+        //   hidden  -> visible
+        $(this)
+            .parent()
+            .find("div.on-web")
+            .toggle();
+
+        // Also toggle the visibility of <div class="in-sentences">
+        // inside the same parent element.
+        $(this)
+            .parent()
+            .find("div.in-sentences")
+            .toggle();
+        });
+  </script>
+  <!-- End: Script Part -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+  <title>
+   Rostrum Definition &amp; Meaning - Merriam-Webster
+  </title>
+  <link href="https://www.merriam-webster.com/dictionary/rostrum" rel="canonical"/>
+  <link href="/opensearch/dictionary.xml" rel="search" title="Merriam-Webster Dictionary" type="application/opensearchdescription+xml"/>
+  <link href="/favicon.svg" rel="icon"/>
+  <link color="#305f7a" href="/safari-pinned-tab.svg" rel="mask-icon"/>
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="144x144"/>
+  <link href="/site.webmanifest" rel="manifest"/>
+  <link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions.1f89efcf6947f2d77ef5.css" media="screen" rel="stylesheet"/>
+  <link as="style" href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions-defer.ad5d4ce4a1782dba8842.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
+  <style type="text/css">
+   .abl {display:none!important;}
+  </style>
+ </head>
+ <body class="no-touch definitions-page dictionary-lookup">
+  <div class="main-container page-item">
+   <div class="left-content col-lg-7 col-xl-8" id="left-content">
+    <span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+    </span>
+    <div class="row entry-header">
+     <div class="col-12">
+      <h1 class="hword">
+       rostrum
+      </h1>
+      <br/>
+      <span class="fl">
+       <a class="important-blue-link" href="">
+        noun
+       </a>
+      </span>
+     </div>
+    </div>
+    <div class="row entry-attr">
+     <div class="col">
+      <span class="prs">
+       <span class="first-slash">
+        \
+       </span>
+       <span class="pr">
+        ˈrä-strəm
+       </span>
+       <span class="pr">
+        <span class="l">
+         also
+        </span>
+        ˈrȯ-
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+      </span>
+      <div class="audio-card">
+       <button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+       <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rostru01.mp3">
+       </audio>
+      </div>
+      <div class="audio-card">
+       <button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+       <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rostr03m.mp3">
+       </audio>
+      </div>
+     </div>
+    </div>
+    <div class="row headword-row">
+     <div class="col">
+      <span class="vg-ins">
+       <span class="il plural">
+        plural
+       </span>
+       <span class="if">
+        rostra
+       </span>
+       <span class="first-slash">
+        \
+       </span>
+       <span class="prt-a">
+        <span class="mw">
+         ˈrä-​strə
+        </span>
+        <a class="play-pron" data-dir="r" data-file="rostru02" data-lang="en_us" data-title="How to pronounce rostrum (audio)" href="/dictionary/rostrum?pronunciation&amp;lang=en_us&amp;dir=r&amp;file=rostru02" title="How to pronounce rostrum (audio)">
+         <img alt="How to pronounce rostrum (audio)" class="svg" src="/images/svg/audio.svg"/>
+        </a>
+        <span class="l">
+         also
+        </span>
+        <span class="mw">
+         ˈrȯ-​
+        </span>
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+       <span class="il or">
+        or
+       </span>
+       <span class="if">
+        rostrums
+       </span>
+      </span>
+     </div>
+    </div>
+    <details>
+     <summary>
+      Click for Explanations
+     </summary>
+     <div class="DictionaryEntries">
+      <div id="dictionary-entry-1">
+       <div class="row vg-header">
+        <div class="col">
+         <h2 class="">
+          Definition of
+          <em>
+           rostrum
+          </em>
+         </h2>
+         <p class="entryNumbers">
+         </p>
+        </div>
+       </div>
+       <div class="vg">
+        <div class="sb has-num has-let">
+         <span class="sb-0">
+          <span class="sen has-num-only">
+           <span class="sn sense-1">
+            <span class="num">
+             1
+            </span>
+           </span>
+           <span class="et">
+            [Latin
+            <em class="mw_t_it">
+             Rostra
+            </em>
+            , plural, a platform for speakers in the Roman Forum decorated with the beaks of captured ships, from plural of
+            <em class="mw_t_it">
+             rostrum
+            </em>
+            ]
+           </span>
+          </span>
+         </span>
+         <span class="sb-1">
+          <div class="sense has-sn">
+           <span class="sn sense-a">
+            <span class="letter">
+             a
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             an ancient Roman platform for public orators
+            </span>
+           </span>
+          </div>
+         </span>
+         <span class="sb-2">
+          <div class="sense has-sn">
+           <span class="sn sense-b">
+            <span class="letter">
+             b
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a stage for public speaking
+            </span>
+           </span>
+          </div>
+         </span>
+         <span class="sb-3">
+          <div class="sense has-sn">
+           <span class="sn sense-c">
+            <span class="letter">
+             c
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a raised platform on a stage
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+        <div class="sb has-num">
+         <span class="sb-0">
+          <div class="sense has-num-only">
+           <span class="sn sense-2">
+            <span class="num">
+             2
+            </span>
+           </span>
+           <span class="dt hasSdSense">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             the curved end of a ship's prow
+            </span>
+           </span>
+           <span class="sdsense">
+            <span class="sd">
+             especially
+            </span>
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             the beak of a war galley
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+        <div class="sb has-num has-let">
+         <span class="sb-0">
+          <div class="sense has-num-only">
+           <span class="sn sense-3">
+            <span class="num">
+             3
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a bodily part or process suggesting a bird's bill: such as
+            </span>
+           </span>
+          </div>
+         </span>
+         <span class="sb-1">
+          <div class="sense has-sn">
+           <span class="sn sense-a">
+            <span class="letter">
+             a
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             the beak, snout, or proboscis of any of various insects or arachnids
+            </span>
+           </span>
+          </div>
+         </span>
+         <span class="sb-2">
+          <div class="sense has-sn">
+           <span class="sn sense-b">
+            <span class="letter">
+             b
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             the often spinelike anterior median prolongation of the carapace of a crustacean (such as a crayfish or lobster)
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+       </div>
+       <body>
+        <div class="main main--10rAd" data-role="content-main">
+         <div class="ant-row-flex ant-row-flex-space-around">
+          <div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+           <div class="word--C9UPa">
+            <div>
+             <div class="" style="position:relative">
+              <h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of rostrum">
+               Online Etymolgy for rostrum
+               <!-- -->
+               <!-- -->
+               (n.)
+              </h2>
+              <section class="word__defination--2q7ZH">
+               <p>
+                "pulpit or platform from which a speaker addresses an audience," 1540s, originally in an ancient Roman context, from Latin
+                <span class="foreign notranslate">
+                 rostrum
+                </span>
+                , the name of the platform stand for public speakers in the Forum in ancient Rome. It was decorated with the beaks of ships taken in the first naval victory of the Roman republic, over Antium, in 338 B.C.E., and the Latin word's older sense is "end of a ship's prow," literally "beak, muzzle, snout," originally "means of gnawing," an instrument noun from
+                <span class="foreign notranslate">
+                 rodere
+                </span>
+                "to gnaw" (see
+                <a class="crossreference notranslate" href="/word/rodent" title="Etymology, meaning and definition of rodent ">
+                 rodent
+                </a>
+                ).
+               </p>
+               <p>
+                The beaks were an ancient form of ram, a beam spiked with pointed iron for the purpose of sinking other vessels. For the form, compare
+                <span class="foreign notranslate">
+                 claustrum
+                </span>
+                "lock, bar," from
+                <span class="foreign notranslate">
+                 claudere
+                </span>
+                "to shut." The extended sense, in reference to any platform for public speaking, is attested by 1766.
+               </p>
+               <p>
+                The classical plural is
+                <span class="foreign notranslate">
+                 rostra
+                </span>
+                , though in English this is more common in the original "ship's beak" sense and
+                <span class="foreign notranslate">
+                 -rums
+                </span>
+                often is used in the secondary sense.
+               </p>
+              </section>
+              <div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+               also from
+               <!-- -->
+               <a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1540s">
+                1540s
+               </a>
+              </div>
+             </div>
+            </div>
+           </div>
+           <div class="related--32LCi">
+            <h2 class="h2_title" style="margin-top:0.5em" title="words related to rostrum">
+             Entries linking to
+             <i>
+              rostrum
+             </i>
+            </h2>
+            <div class="related__details--2kumU">
+             <div class="word--C9UPa word_4pc--2SZw8">
+              <div>
+               <a class="word__name--TTbAA word_thumbnail__name--1khEg" href="/word/rodent#etymonline_v_15148" style="margin-bottom:5px;display:block" title="Origin and meaning of rodent">
+                rodent
+                <!-- -->
+                <!-- -->
+                (n.)
+                <span class="word_thumbnail__name_icon--2RFFN">
+                </span>
+               </a>
+               <div class="word__etymology_expand--1s7tE">
+                <section class="word__defination--2q7ZH undefined">
+                 <div>
+                 </div>
+                 <p>
+                  "a rodent mammal" 1835 (as an adjective 1833), from Modern Latin
+                  <span class="foreign notranslate">
+                   Rodentia
+                  </span>
+                  , the order name, from Latin
+                  <span class="foreign notranslate">
+                   rodentem
+                  </span>
+                  (nominative
+                  <span class="foreign notranslate">
+                   rodens
+                  </span>
+                  ), "the gnawers," present participle of
+                  <span class="foreign notranslate">
+                   rodere
+                  </span>
+                  "to gnaw, eat away," which is of uncertain etymology, possibly is from an extended form of PIE root
+                  <a class="crossreference notranslate" href="/word/*red-" title="Etymology, meaning and definition of *red- ">
+                   *red-
+                  </a>
+                  "to scrape, scratch, gnaw." Uncertain connection to Old English
+                  <span class="foreign notranslate">
+                   rætt
+                  </span>
+                  (see
+                  <a class="crossreference notranslate" href="/word/rat#etymonline_v_3387" title="Etymology, meaning and definition of rat ">
+                   rat
+                  </a>
+                  (n.)). They are characterized by having no canine teeth and strong incisors.
+                 </p>
+                </section>
+               </div>
+              </div>
+              <div style="clear:both">
+              </div>
+             </div>
+             <div class="word--C9UPa word_4pc--2SZw8">
+              <div>
+               <a class="word__name--TTbAA word_thumbnail__name--1khEg" href="/word/*red-#etymonline_v_52885" style="margin-bottom:5px;display:block" title="Origin and meaning of *red-">
+                *red-
+                <!-- -->
+                <span class="word_thumbnail__name_icon--2RFFN">
+                </span>
+               </a>
+               <div class="word__etymology_expand--1s7tE">
+                <section class="word__defination--2q7ZH undefined">
+                 <div>
+                 </div>
+                 <p>
+                  <span class="foreign notranslate">
+                   *rēd-
+                  </span>
+                  , Proto-Indo-European root meaning "to scrape, scratch, gnaw."
+                 </p>
+                 <p>
+                  It forms (possibly) all or part of:
+                  <a class="crossreference notranslate" href="/word/abrade" title="Etymology, meaning and definition of abrade ">
+                   abrade
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/abrasion" title="Etymology, meaning and definition of abrasion ">
+                   abrasion
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/corrode" title="Etymology, meaning and definition of corrode ">
+                   corrode
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/corrosion" title="Etymology, meaning and definition of corrosion ">
+                   corrosion
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/erase" title="Etymology, meaning and definition of erase ">
+                   erase
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/erode" title="Etymology, meaning and definition of erode ">
+                   erode
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/erosion" title="Etymology, meaning and definition of erosion ">
+                   erosion
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/radula" title="Etymology, meaning and definition of radula ">
+                   radula
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/rascal" title="Etymology, meaning and definition of rascal ">
+                   rascal
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/rase" title="Etymology, meaning and definition of rase ">
+                   rase
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/rash#etymonline_v_3379" title="Etymology, meaning and definition of rash ">
+                   rash
+                  </a>
+                  (n.) "eruption of small red spots on skin;"
+                  <a class="crossreference notranslate" href="/word/raster" title="Etymology, meaning and definition of raster ">
+                   raster
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/rat" title="Etymology, meaning and definition of rat ">
+                   rat
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/raze" title="Etymology, meaning and definition of raze ">
+                   raze
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/razor" title="Etymology, meaning and definition of razor ">
+                   razor
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/rodent" title="Etymology, meaning and definition of rodent ">
+                   rodent
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/rostrum" title="Etymology, meaning and definition of rostrum ">
+                   rostrum
+                  </a>
+                  ;
+                  <a class="crossreference notranslate" href="/word/tabula%20rasa" title="Etymology, meaning and definition of tabula rasa ">
+                   tabula rasa
+                  </a>
+                  .
+                 </p>
+                 <p>
+                  It is the hypothetical source of/evidence for its existence is provided by: Sanskrit
+                  <span class="foreign notranslate">
+                   radati
+                  </span>
+                  "scrapes, gnaws,"
+                  <span class="foreign notranslate">
+                   radanah
+                  </span>
+                  "tooth;" Latin
+                  <span class="foreign notranslate">
+                   rodere
+                  </span>
+                  "to gnaw, eat away,"
+                  <span class="foreign notranslate">
+                   radere
+                  </span>
+                  "to scrape;" Welsh
+                  <span class="foreign notranslate">
+                   rhathu
+                  </span>
+                  "scrape, polish."
+                 </p>
+                </section>
+               </div>
+              </div>
+              <div style="clear:both">
+              </div>
+             </div>
+             <div class="word--C9UPa word_4pc--2SZw8">
+              <div>
+               <a class="word__name--TTbAA word_thumbnail__name--1khEg" href="/word/rostral#etymonline_v_37435" style="margin-bottom:5px;display:block" title="Origin and meaning of rostral">
+                rostral
+                <!-- -->
+                <!-- -->
+                (adj.)
+                <span class="word_thumbnail__name_icon--2RFFN">
+                </span>
+               </a>
+               <div class="word__etymology_expand--1s7tE">
+                <section class="word__defination--2q7ZH undefined">
+                 <div>
+                 </div>
+                 <p>
+                  "of pertaining to or resembling a rostrum," c. 1400, from Late Latin
+                  <span class="foreign notranslate">
+                   rostralis
+                  </span>
+                  , from Latin
+                  <span class="foreign notranslate">
+                   rostrum
+                  </span>
+                  "beak" (see
+                  <a class="crossreference notranslate" href="/word/rostrum" title="Etymology, meaning and definition of rostrum ">
+                   rostrum
+                  </a>
+                  ).
+                 </p>
+                </section>
+               </div>
+              </div>
+              <div style="clear:both">
+              </div>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </body>
+      </div>
+      <span id="anchor-seporator">
+      </span>
+      <div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+       <h2>
+        Synonyms for
+        <em>
+         rostrum
+        </em>
+       </h2>
+       <p class="function-label">
+        Synonyms
+       </p>
+       <ul class="mw-list">
+        <li>
+         <a class="" href="/dictionary/dais">
+          dais
+         </a>
+         ,
+        </li>
+        <li>
+         <a class="" href="/dictionary/platform">
+          platform
+         </a>
+         ,
+        </li>
+        <li>
+         <a class="" href="/dictionary/podium">
+          podium
+         </a>
+         ,
+        </li>
+        <li>
+         <a class="" href="/dictionary/stage">
+          stage
+         </a>
+         ,
+        </li>
+        <li>
+         <a class="" href="/dictionary/stand">
+          stand
+         </a>
+         ,
+        </li>
+        <li>
+         <a class="syn-last" href="/dictionary/tribune">
+          tribune
+         </a>
+        </li>
+       </ul>
+      </div>
+      <div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+       <h2>
+        Examples of
+        <em>
+         rostrum
+        </em>
+        in a Sentence
+       </h2>
+       <div class="in-sentences">
+        <span class="ex-sent first-child t no-aq sents">
+         stood on a
+         <em class="mw_t_it">
+          rostrum
+         </em>
+         to address the huge crowd
+        </span>
+       </div>
+       <div class="on-web">
+        <span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+        <span class="ex-sent sents" data-example-id="11688325">
+         <span class="t has-aq">
+          Gavin Strang, managing director and head of private collections at Lyon &amp; Turnbull, was on the
+          <em>
+           rostrum
+          </em>
+          of the Edinburgh auction house when the dish was sold.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            CNN
+           </em>
+           , 7 Oct. 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="11580447">
+         <span class="t has-aq">
+          On Friday, three vice presidents and five prime ministers — including Bangladesh's Sheikh Hasina and New Zealand's Jacinda Arden — will take the
+          <em>
+           rostrum
+          </em>
+          or give their address in a prerecorded video.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Mallika Sen,
+           <em>
+            ajc
+           </em>
+           , 24 Sep. 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="11260381">
+         <span class="t has-aq">
+          Notably absent from the
+          <em>
+           rostrum
+          </em>
+          in front of City all was state Sen. Jim Mills, D-San Diego, author of much of the state legislation that made the project possible.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            San Diego Union-Tribune
+           </em>
+           , 20 July 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="11047744">
+         <span class="t has-aq">
+          When a whale or dolphin raises its
+          <em>
+           rostrum
+          </em>
+          vertically above the water, then slips back below the surface.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            Los Angeles Times
+           </em>
+           , 5 Aug. 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="10736653">
+         <span class="t has-aq">
+          The politicians in the two prime seats on the
+          <em>
+           rostrum
+          </em>
+          are always noteworthy for their visibility, providing real-time direct reaction to the President's remarks.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Betsy Klein,
+           <em>
+            CNN
+           </em>
+           , 28 Apr. 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="10407306">
+         <span class="t has-aq">
+          As Chelsea captain Cesar Azpilicueta cradled the European Cup before thrusting it into the air to the backdrop of fireworks, Pep Guardiola and his distraught Manchester City players stood way behind the winner’s
+          <em>
+           rostrum
+          </em>
+          and looked on in anguish.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Steve Douglas,
+           <em>
+            ajc
+           </em>
+           , 30 May 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="10407304">
+         <span class="t has-aq">
+          As Chelsea captain Cesar Azpilicueta cradled the European Cup before thrusting it into the air to the backdrop of fireworks, Pep Guardiola and his distraught Manchester City players stood way behind the winner's
+          <em>
+           rostrum
+          </em>
+          and looked on in anguish.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Steve Douglas,
+           <em>
+            Star Tribune
+           </em>
+           , 29 May 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="10407305">
+         <span class="t has-aq">
+          If tradition holds, Harris will be seated directly behind him on the
+          <em>
+           rostrum
+          </em>
+          alongside House Speaker Nancy Pelosi -- the first time two women have filled the iconic television shot behind the President.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Kevin Liptak,
+           <em>
+            CNN
+           </em>
+           , 25 Apr. 2021
+          </span>
+         </span>
+        </span>
+       </div>
+      </div>
+      <div class="widget firstknown-list" id="first-known-anchor">
+       <h2>
+        First Known Use of
+        <em>
+         rostrum
+        </em>
+       </h2>
+       <p class="ety-sl" data-entry-id="1">
+        1542, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+       </p>
+      </div>
+      <div class="widget etymology-list" id="etymology-anchor">
+       <h2>
+        History and Etymology for
+        <em>
+         rostrum
+        </em>
+       </h2>
+       <p class="et">
+        Latin, beak, ship's beak, from
+        <em class="mw_t_it">
+         rodere
+        </em>
+        to gnaw  — more at
+        <a class="mw_t_mat" href="/dictionary/rodent#etymology">
+         rodent
+        </a>
+       </p>
+      </div>
+      <div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+      </div>
+      <div class="widget learn_more">
+      </div>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+     </div>
+    </details>
+   </div>
+  </div>
+ </body>
+ <div class="pagination-controls col-lg-7 col-xl-8 left-content">
+  <button id="prev-btn" type="button">
+   ◀ Previous
+  </button>
+  <span id="page-indicator">
+   Page 1 of 3
+  </span>
+  <button id="next-btn" type="button">
+   Next ▶
+  </button>
+ </div>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       vagrancy
+      </h1>
+<br/>
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈvā-grən(t)-sē
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/v/vagran01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="il plural">
+        plural
+       </span>
+<span class="if">
+        vagrancies
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           vagrancy
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the state or action of being
+             <a class="mw_t_a_link" href="/dictionary/vagrant">
+              vagrant
+             </a>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the offense of being a vagrant
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-3">
+<span class="num">
+             3
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/vagary">
+<span class="text-uppercase">
+               vagary
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of vagrancy">
+               Online Etymolgy for vagrancy
+               <!-- -->
+<!-- -->
+               (n.)
+              </h2>
+<section class="word__defination--2q7ZH">
+<p>
+                "life of idle begging," 1706, from
+                <a class="crossreference notranslate" href="/word/vagrant" title="Etymology, meaning and definition of vagrant ">
+                 vagrant
+                </a>
+                + abstract noun suffix
+                <a class="crossreference notranslate" href="/word/-cy" title="Etymology, meaning and definition of -cy ">
+                 -cy
+                </a>
+                . Earlier in a figurative sense, "mental wandering" (1640s). By late 18c. used in law as a catch-all for miscellaneous petty offenses against public order.
+               </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+               also from
+               <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1706">
+                1706
+               </a>
+</div>
+</div>
+</div>
+</div>
+<div class="related--32LCi">
+<h2 class="h2_title" style="margin-top:0.5em" title="words related to vagrancy">
+             Entries linking to
+             <i>
+              vagrancy
+             </i>
+</h2>
+<div class="related__details--2kumU">
+<div class="word--C9UPa word_4pc--2SZw8">
+<div>
+<a class="word__name--TTbAA word_thumbnail__name--1khEg" href="/word/-cy#etymonline_v_29250" style="margin-bottom:5px;display:block" title="Origin and meaning of -cy">
+                -cy
+                <!-- -->
+<span class="word_thumbnail__name_icon--2RFFN">
+</span>
+</a>
+<div class="word__etymology_expand--1s7tE">
+<section class="word__defination--2q7ZH undefined">
+<div>
+</div>
+<p>
+                  abstract noun suffix of quality or rank, from Latin
+                  <span class="foreign notranslate">
+                   -cia
+                  </span>
+                  ,
+                  <span class="foreign notranslate">
+                   -tia
+                  </span>
+                  , from Greek
+                  <span class="foreign notranslate">
+                   -kia
+                  </span>
+                  ,
+                  <span class="foreign notranslate">
+                   -tia
+                  </span>
+                  , from abstract ending
+                  <span class="foreign notranslate">
+                   -ia
+                  </span>
+                  (see
+                  <a class="crossreference notranslate" href="/word/-ia" title="Etymology, meaning and definition of -ia ">
+                   -ia
+                  </a>
+                  ) + stem ending
+                  <span class="foreign notranslate">
+                   -c-
+                  </span>
+                  or
+                  <span class="foreign notranslate">
+                   -t-
+                  </span>
+                  . The native correspondents are
+                  <a class="crossreference notranslate" href="/word/-ship" title="Etymology, meaning and definition of -ship ">
+                   -ship
+                  </a>
+                  ,
+                  <a class="crossreference notranslate" href="/word/-hood" title="Etymology, meaning and definition of -hood ">
+                   -hood
+                  </a>
+                  .
+                 </p>
+</section>
+</div>
+</div>
+<div style="clear:both">
+</div>
+</div>
+<div class="word--C9UPa word_4pc--2SZw8">
+<div>
+<a class="word__name--TTbAA word_thumbnail__name--1khEg" href="/word/vagrant#etymonline_v_4601" style="margin-bottom:5px;display:block" title="Origin and meaning of vagrant">
+                vagrant
+                <!-- -->
+<!-- -->
+                (n.)
+                <span class="word_thumbnail__name_icon--2RFFN">
+</span>
+</a>
+<div class="word__etymology_expand--1s7tE">
+<section class="word__defination--2q7ZH undefined">
+<div>
+</div>
+<p>
+                  mid-15c., "person who lacks regular employment, one without fixed abode, a tramp," probably from Anglo-French
+                  <span class="foreign notranslate">
+                   vageraunt
+                  </span>
+                  , also
+                  <span class="foreign notranslate">
+                   wacrant
+                  </span>
+                  ,
+                  <span class="foreign notranslate">
+                   walcrant
+                  </span>
+                  , which is said in many sources to be a noun use of the past participle of Old French
+                  <span class="foreign notranslate">
+                   walcrer
+                  </span>
+                  "to wander," from Frankish (Germanic)
+                  <span class="foreign notranslate">
+                   *walken
+                  </span>
+                  , from the same source as Old Norse
+                  <span class="foreign notranslate">
+                   valka
+                  </span>
+                  "wander" and English
+                  <a class="crossreference notranslate" href="/word/walk#etymonline_v_4803" title="Etymology, meaning and definition of walk ">
+                   walk
+                  </a>
+                  (v.).
+                 </p>
+<p>
+                  Under this theory the word was influenced by Old French
+                  <span class="foreign notranslate">
+                   vagant
+                  </span>
+                  ,
+                  <span class="foreign notranslate">
+                   vagaunt
+                  </span>
+                  "wandering," from Latin
+                  <span class="foreign notranslate">
+                   vagantem
+                  </span>
+                  (nominative
+                  <span class="foreign notranslate">
+                   vagans
+                  </span>
+                  ), past participle of
+                  <span class="foreign notranslate">
+                   vagari
+                  </span>
+                  "to wander, stroll about" (see
+                  <a class="crossreference notranslate" href="/word/vagary" title="Etymology, meaning and definition of vagary ">
+                   vagary
+                  </a>
+                  ). But on another theory the Anglo-French word ultimately is from Old French
+                  <span class="foreign notranslate">
+                   vagant
+                  </span>
+                  , with an unetymological
+                  <span class="foreign notranslate">
+                   -r-
+                  </span>
+                  . Middle English also had
+                  <span class="foreign notranslate">
+                   vagaunt
+                  </span>
+                  "wandering, without fixed abode" (late 14c.), from Old French
+                  <span class="foreign notranslate">
+                   vagant
+                  </span>
+                  .
+                 </p>
+</section>
+</div>
+</div>
+<div style="clear:both">
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms for
+        <em>
+         vagrancy
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/bee">
+          bee
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/caprice">
+          caprice
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/crank">
+          crank
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/fancy">
+          fancy
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/freak">
+          freak
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/humor">
+          humor
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/kink">
+          kink
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/maggot">
+          maggot
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/megrim">
+          megrim
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/notion">
+          notion
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/vagary">
+          vagary
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/whim">
+          whim
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/whimsy">
+          whimsy
+         </a>
+</li>
+<li>
+<span class="wvrs">
+          (
+          <span class="wvl">
+           also
+          </span>
+<span class="wva">
+<a href="/dictionary/whimsey">
+            whimsey
+           </a>
+</span>
+          )
+         </span>
+</li>
+</ul>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         vagrancy
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         a frequent victim to the
+         <em class="mw_t_it">
+          vagrancies
+         </em>
+         of the heart, she had a succession of passionate but short-lived romances
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="10837767">
+<span class="t has-aq">
+          Hill has an extensive history of misdemeanor cases involving trespassing, obstruction, battery,
+          <em>
+           vagrancy
+          </em>
+          , larceny and theft allegations.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ken Ritter And Terry Tang,
+           <em>
+            Star Tribune
+           </em>
+           , 13 July 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10400049">
+<span class="t has-aq">
+          Austin incentivized
+          <em>
+           vagrancy
+          </em>
+          as a lifestyle choice and did nothing to prepare for the consequences of the policy shift.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Matt Mackowiak,
+           <em>
+            National Review
+           </em>
+           , 23 May 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10400050">
+<span class="t has-aq">
+          Levels of
+          <em>
+           vagrancy
+          </em>
+          in progressive redoubts like New York City and San Francisco have reached levels that are too high to ignore.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jason L. Riley,
+           <em>
+            WSJ
+           </em>
+           , 18 May 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9861789">
+<span class="t has-aq">
+          The park, which is adjacent to West Harbor Drive and opposite convention hotels, has become a hotspot for crime, drugs and
+          <em>
+           vagrancy
+          </em>
+          , city staffers have said.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jennifer Van Grove,
+           <em>
+            San Diego Union-Tribune
+           </em>
+           , 16 Mar. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9654540">
+<span class="t has-aq">
+          The mostly passive Marina District park is a hotspot for
+          <em>
+           vagrancy
+          </em>
+          , drugs and crime, Richter said.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jennifer Van Grove,
+           <em>
+            San Diego Union-Tribune
+           </em>
+           , 22 Feb. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="7485883">
+<span class="t has-aq">
+          During what seems to have been an especially well-lubricated 1953 Memorial Day weekend, Anchorage police arrested 53 for drunkenness and
+          <em>
+           vagrancy
+          </em>
+          , requiring a special court session to separate those who could be sentenced to the farm.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           David Reamer,
+           <em>
+            Anchorage Daily News
+           </em>
+           , 12 Apr. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="7384636">
+<span class="t has-aq">
+          And like most
+          <em>
+           vagrancy
+          </em>
+          laws more broadly, anti-loitering laws were race-neutral on paper.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Bonnie Kristian,
+           <em>
+            TheWeek
+           </em>
+           , 7 May 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="7172835">
+<span class="t has-aq">
+          The problem is really a mixture of poverty, mental illness, substance abuse, criminality,
+          <em>
+           vagrancy
+          </em>
+          and a certain percentage that could honestly do other things, but they, for various reasons, choose to live that way.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Anchorage Daily News
+           </em>
+           , 28 Mar. 2020
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         vagrancy
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1641, in the meaning defined at
+        <a href="#h1">
+         sense 3
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         vagrancy
+        </em>
+</h2>
+<p class="et">
+<a class="mw_t_et_link" href="/dictionary/vagrant#etymology">
+         vagr(ant)
+         <span class="text-lowercase">
+          entry
+         </span>
+         1
+        </a>
+        or
+        <a class="mw_t_et_link" href="/dictionary/vagrant#etymology">
+         vagr(ant)
+         <span class="text-lowercase">
+          entry
+         </span>
+         2
+        </a>
+        +
+        <a class="mw_t_et_link" href="/dictionary/-ancy#etymology">
+         -ancy
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       obfuscate
+      </h1>
+<br/>
+<span class="fl">
+<a class="important-blue-link" href="">
+        verb
+       </a>
+</span>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈäb-fə-ˌskāt
+       </span>
+<span class="pun">
+        ;
+       </span>
+<span class="pr">
+        äb-ˈfə-ˌskāt
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        əb-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/o/obfusc01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="if">
+        obfuscated
+       </span>
+<span class="sep-semicolon">
+        ;
+       </span>
+<span class="if">
+        obfuscating
+       </span>
+</span>
+</div>
+</div>
+<div class="learners-essential-meaning">
+<div class="row vg-header">
+<div class="col">
+<p class="subheader-md hword2 english-learners">
+        Essential Meaning of
+        <em>
+         obfuscate
+        </em>
+</p>
+</div>
+</div>
+<div class="learners-def">
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="sl">
+           formal
+          </span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+             :
+            </strong>
+            to make (something) more difficult to understand
+           </span>
+<span class="ex-sent first-child t no-aq sents">
+            Politicians keep
+            <em class="mw_t_it">
+             obfuscating
+            </em>
+            the issues.
+           </span>
+<span class="ex-sent t no-aq sents">
+            Their explanations only serve to
+            <em class="mw_t_it">
+             obfuscate
+            </em>
+            and confuse.
+           </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Full Definition of
+          <em>
+           obfuscate
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<p class="vd firstVd">
+<a class="important-blue-link" href="">
+          transitive verb
+         </a>
+</p>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-1 a">
+<span class="num">
+             1
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to throw into shadow
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/darken">
+<span class="text-uppercase">
+               darken
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to make obscure
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+<span class="mw_t_sp">
+<span class="mw_t_wi">
+               obfuscate
+              </span>
+              the issue
+             </span>
+</span>
+<span class="ex-sent t has-aq sents">
+             officials who … continue to obscure and
+             <span class="mw_t_wi">
+              obfuscate
+             </span>
+             what happened
+            </span>
+<span class="ex-sent aq has-aq sents">
+<span class="aq">
+<span class="auth">
+               — Mary Carroll
+              </span>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/confuse">
+<span class="text-uppercase">
+               confuse
+              </span>
+</a>
+</span>
+<span class="ex-sent first-child t no-aq sents">
+<span class="mw_t_sp">
+<span class="mw_t_wi">
+               obfuscate
+              </span>
+              the reader
+             </span>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+<div class="vg">
+<p class="vd">
+<a class="important-blue-link" href="">
+          intransitive verb
+         </a>
+</p>
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to be evasive, unclear, or confusing
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             The suspect often
+             <em class="mw_t_it">
+              obfuscated
+             </em>
+             during the interrogation.
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of obfuscation">
+               Online Etymolgy for obfuscation
+               <!-- -->
+<!-- -->
+               (n.)
+              </h2>
+<section class="word__defination--2q7ZH">
+<p>
+                "the act of obscuring," early 15c.,
+                <span class="foreign notranslate">
+                 obfuscacioun
+                </span>
+                , originally medical, "the darkening of a sore," from Latin
+                <span class="foreign notranslate">
+                 obfuscationem
+                </span>
+                (nominative
+                <span class="foreign notranslate">
+                 obfuscatio
+                </span>
+                ), noun of action from past-participle stem of
+                <span class="foreign notranslate">
+                 obfuscare
+                </span>
+                "to darken" (see
+                <a class="crossreference notranslate" href="/word/obfuscate" title="Etymology, meaning and definition of obfuscate ">
+                 obfuscate
+                </a>
+                ).
+               </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+               also from
+               <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:early%2015c.">
+                early 15c.
+               </a>
+</div>
+</div>
+</div>
+</div>
+<div class="related--32LCi">
+<h2 class="h2_title" style="margin-top:0.5em" title="words related to obfuscation">
+             Entries linking to
+             <i>
+              obfuscation
+             </i>
+</h2>
+<div class="related__details--2kumU">
+<div class="word--C9UPa word_4pc--2SZw8">
+<div>
+<a class="word__name--TTbAA word_thumbnail__name--1khEg" href="/word/obfuscate#etymonline_v_2415" style="margin-bottom:5px;display:block" title="Origin and meaning of obfuscate">
+                obfuscate
+                <!-- -->
+<!-- -->
+                (v.)
+                <span class="word_thumbnail__name_icon--2RFFN">
+</span>
+</a>
+<div class="word__etymology_expand--1s7tE">
+<section class="word__defination--2q7ZH undefined">
+<div>
+</div>
+<p>
+                  "to darken, obscure, confuse, bewilder," 1530s, from Latin
+                  <span class="foreign notranslate">
+                   obfuscatus
+                  </span>
+                  , past participle of
+                  <span class="foreign notranslate">
+                   obfuscare
+                  </span>
+                  "to darken" (usually in a figurative sense), from
+                  <span class="foreign notranslate">
+                   ob
+                  </span>
+                  "in front of, before" (see
+                  <a class="crossreference notranslate" href="/word/ob-" title="Etymology, meaning and definition of ob- ">
+                   ob-
+                  </a>
+                  ) +
+                  <span class="foreign notranslate">
+                   fuscare
+                  </span>
+                  "to make dark," from
+                  <span class="foreign notranslate">
+                   fuscus
+                  </span>
+                  "dark" (see
+                  <a class="crossreference notranslate" href="/word/dusk" title="Etymology, meaning and definition of dusk ">
+                   dusk
+                  </a>
+                  ). Related:
+                  <span class="foreign notranslate">
+                   Obfuscated
+                  </span>
+                  ;
+                  <span class="foreign notranslate">
+                   obfuscating
+                  </span>
+                  .
+                 </p>
+</section>
+</div>
+</div>
+<div style="clear:both">
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         obfuscate
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         obfuscation
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˌäb-​(ˌ)fə-​ˈskā-​shən
+         </span>
+<a class="play-pron" data-dir="o" data-file="obfusc02" data-lang="en_us" data-title="How to pronounce obfuscate (audio)" href="/dictionary/obfuscate?pronunciation&amp;lang=en_us&amp;dir=o&amp;file=obfusc02" title="How to pronounce obfuscate (audio)">
+<img alt="How to pronounce obfuscate (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         noun
+        </span>
+</div>
+<div class="uro">
+<span class="ure">
+         obfuscatory
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          äb-​ˈfə-​skə-​ˌtȯr-​ē
+         </span>
+<a class="play-pron" data-dir="o" data-file="obfusc03" data-lang="en_us" data-title="How to pronounce obfuscate (audio)" href="/dictionary/obfuscate?pronunciation&amp;lang=en_us&amp;dir=o&amp;file=obfusc03" title="How to pronounce obfuscate (audio)">
+<img alt="How to pronounce obfuscate (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+<span class="addPunct">
+          ,
+         </span>
+<span class="mw">
+          əb-​
+         </span>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         adjective
+        </span>
+</div>
+</div>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms &amp; Antonyms for
+        <em>
+         obfuscate
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/becloud">
+          becloud
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/befog">
+          befog
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/blur">
+          blur
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/cloud">
+          cloud
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/confuse">
+          confuse
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/fog">
+          fog
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/muddy">
+          muddy
+         </a>
+</li>
+</ul>
+<p class="function-label">
+        Antonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/clarify">
+          clarify
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/clear">
+          clear (up)
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/illuminate">
+          illuminate
+         </a>
+</li>
+</ul>
+</div>
+<div class="widget little_gems little-gems-module-anchor-1" id="note-1-anchor">
+<h2>
+        Try to Understand the Roots of
+        <span class="mw_t_parahw">
+         Obfuscate
+        </span>
+</h2>
+<p>
+        To obfuscate something means to make it so that it isn't clear or transparent, much like dirty water makes it hard to see to the bottom of a pond. The verb shares its
+        <em>
+         ob-
+        </em>
+        root (meaning "over, completely") with
+        <a href="https://www.merriam-webster.com/dictionary/obscure">
+<em>
+          obscure
+         </em>
+</a>
+        , another word that  can refer to the act of concealing something or making it more difficult to see or understand. The rest of
+        <em>
+         obfuscate
+        </em>
+        comes from Latin
+        <em>
+         fuscus
+        </em>
+        , which means "dark brown" and is distantly related to our word
+        <a href="https://www.merriam-webster.com/dictionary/dusk">
+<em>
+          dusk
+         </em>
+</a>
+        .
+       </p>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         obfuscate
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         Politicians keep
+         <em class="mw_t_it">
+          obfuscating
+         </em>
+         the issues.
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         Their explanations only serve to
+         <em class="mw_t_it">
+          obfuscate
+         </em>
+         and confuse.
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11921468">
+<span class="t has-aq">
+          Some critics, including the company’s former head of civic integrity, the division that developed the metrics Facebook shared Tuesday, said on Twitter recently that these numbers can
+          <em>
+           obfuscate
+          </em>
+          the actual story.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 8 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11713188">
+<span class="t has-aq">
+          Campaign literature and answers on candidate questionnaires often intentionally
+          <em>
+           obfuscate
+          </em>
+          their viewpoints.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Hannah Drown,
+           <em>
+            cleveland
+           </em>
+           , 23 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11713189">
+<span class="t has-aq">
+          The floor is swamped with huge projections — words (often quotes from W.E.B. Du Bois), faces (of Black men), and shifting slices of light — many of which
+          <em>
+           obfuscate
+          </em>
+          the dancing being done.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Helen Shaw,
+           <em>
+            Vulture
+           </em>
+           , 29 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11284514">
+<span class="t has-aq">
+          Ordinary Afghans are purging their phones of forbidden music and otherwise trying to
+          <em>
+           obfuscate
+          </em>
+          their digital identities.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jacob Silverman,
+           <em>
+            The New Republic
+           </em>
+           , 26 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10651349">
+<span class="t has-aq">
+          The Proud Boys, like other racist groups, has worked to
+          <em>
+           obfuscate
+          </em>
+          its real intentions, Amarasingam said: The group cloaks its ideology to draw in recruits, then reveals its racist side once members are reeled in.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Will Carless,
+           <em>
+            USA TODAY
+           </em>
+           , 21 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10651350">
+<span class="t has-aq">
+          There’s a new mode that will allow those users to
+          <em>
+           obfuscate
+          </em>
+          their location and your destination in the browser.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Gear Team,
+           <em>
+            Wired
+           </em>
+           , 7 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10541679">
+<span class="t has-aq">
+          The browser company Brave allows users to block trackers, and ad-blocking add-ons from companies like Ghostery and AdBlock let users
+          <em>
+           obfuscate
+          </em>
+          their web browsing traffic from advertisers to a certain extent.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Patrick Lucas Austin,
+           <em>
+            Time
+           </em>
+           , 7 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10541678">
+<span class="t has-aq">
+          Documents have gone missing, and media and official accounts
+          <em>
+           obfuscate
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 28 May 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         obfuscate
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1536, in the meaning defined at
+        <a href="#h1">
+         transitive sense 1a
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         obfuscate
+        </em>
+</h2>
+<p class="et">
+        borrowed from Late Latin
+        <em class="mw_t_it">
+         obfuscātus, offuscātus,
+        </em>
+        past participle of
+        <em class="mw_t_it">
+         obfuscāre, offuscāre
+        </em>
+        "to obscure, darken, depreciate," from Latin
+        <em class="mw_t_it">
+         ob-,
+        </em>
+        perfective prefix +
+        <em class="mw_t_it">
+         -fuscāre,
+        </em>
+        verbal derivative of
+        <em class="mw_t_it">
+         fuscus
+        </em>
+        "dark-colored, somber, dark-skinned or -complected"  — more at
+        <a class="mw_t_mat" href="/dictionary/ob-#etymology">
+         ob-
+        </a>
+        ,
+        <a class="mw_t_mat" href="/dictionary/dusk#etymology">
+         dusk
+         <span class="text-lowercase">
+          entry
+         </span>
+         1
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body></html>

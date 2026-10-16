@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 360px;
+            margin:12px 12px;
+            padding:0px 0px;
+            }
+
+        button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style>
+        /* Select the text box */
+        div.page-item {
+            width: 320px;
+        }
+
+        label[for="username"] {
+            border-radius:8px;
+            display:block;
+            width: 320px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            overflow-wrap: normal;
+            background-color: beige;
+        }
+
+        hr {
+            margin-right: 12px;
+            margin-left:12px;
+            width: 360px;
+        }
+
+        input[type="text"] {
+            display:block;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            width: 100%;
+            max-width: 320px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1; /* Soft gray border */
+            border-radius: 8px;        /* Modern rounded corners */
+            outline: none;
+            transition: all 0.15s ease-in-out; /* Smooth transition for focus effects */
+        }
+
+        input.correct {
+            background-color: aquamarine;
+            transition:none;
+        }
+        /* Modern focus state (glow/border color change) */
+        input[type="text"]:focus {
+            border-color: #3b82f6;     /* Vibrant modern blue */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Soft outer glow */
+        }
+
+        /* Placeholder styling */
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+    </style>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all inputs once and loop through them
+        document.querySelectorAll('input').forEach(inputField => {
+            inputField.addEventListener('input', (event) => {
+                const field = event.target;
+                // Compare value to name and toggle the "correct" class
+                if (field.value.toLowerCase() === field.name.toLowerCase()) {
+                    field.classList.add("correct");
+                } else {
+                    field.classList.remove("correct");
+                }
+            });
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    // Collect all input elements into an array for easy index tracking
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+            // Check if the pressed key is "Enter"
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents accidental form submission
+                // Find the next input in the array and focus it
+                const nextInput = inputs[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+        });
+    });
+
+
+    });
+</script>
+</head>
+<body>
+<div class="main-container page-item">
+<label for="username">台球的</label>
+<input class="target" name="billiard" placeholder="b" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈbi(l)-yərd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/billia01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">狄俄尼索斯（希腊神话中司掌美酒、庆典和丰产的神）</label>
+<input class="target" name="Dionysus" placeholder="D" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌdī-ə-ˈnī-səs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/dionys07.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（门窗等前面的）雨篷，凉篷，遮篷</label>
+<input class="target" name="awning" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈȯ-niŋ</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/awning01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">使受限制；使难有作为</label>
+<input class="target" name="hamstring" placeholder="h" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈham-ˌstriŋ</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/h/hamstr01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">锭;铸块</label>
+<input class="target" name="ingot" placeholder="i" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈiŋ-gət</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/ingot001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">小块;（尤指）金块</label>
+<input class="target" name="nugget" placeholder="n" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈnə-gət</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/n/nugget01.mp3"></audio>
+</div>
+</div>
+<div class="page-item">
+<label>
+        讲坛，讲台
+        </label>
+<input class="target" name="rostrum" placeholder="r" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈrä-strəm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rostru01.mp3"></audio>
+</div>
+<hr/>
+</div>
+<div class="page-item">
+<label for="username">
+        漂泊，流浪
+        </label>
+<input class="targe" name="vagrancy" placeholder="v" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈvā-grən(t)-sē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/v/vagran01.mp3"></audio>
+</div>
+<hr/>
+</div>
+<div class="page-item">
+<label for="username">
+        （故意的）混淆, 代码混淆（通过故意生成人类难以理解的机器码来压缩代码大小以及防止代码被破解）
+        </label>
+<input class="targe" name="obfuscation" placeholder="o" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈäb-fə-ˌskāt</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/o/obfusc01.mp3"></audio>
+</div>
+<hr/>
+</div>
+<div class="page-item">
+<label for="username">
+        漂泊，流浪
+        </label>
+<input class="targe" name="vagrancy" placeholder="v" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈvā-grən(t)-sē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/v/vagran01.mp3"></audio>
+</div>
+<hr/>
+</div>
+<div class="page-item">
+<label for="username">
+        漂泊，流浪
+        </label>
+<input class="targe" name="vagrancy" placeholder="v" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈvā-grən(t)-sē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/v/vagran01.mp3"></audio>
+</div>
+<hr/>
+</div>
+</body>
