@@ -142,7 +142,7 @@
         // Update indicator and button states
         pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
         prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        // nextBtn.disabled = currentPage === totalPages || totalPages === 0;
         }
 
         prevBtn.addEventListener('click', () => {

@@ -58,30 +58,30 @@
     </style>
 <script>
         document.addEventListener("DOMContentLoaded", () => {
-    // Select all <li> elements inside your <ul>
-    const listItems = document.querySelectorAll('ul li');
-    
-    let previousPrefix = null;
+            // Select all <li> elements inside your <ul>
+            const listItems = document.querySelectorAll('ul li');
 
-    listItems.forEach((li, index) => {
-        const aTag = li.querySelector('a');
-        if (!aTag) return; // Skip if no <a> tag exists
+            let previousPrefix = null;
 
-        const href = aTag.getAttribute('href') || '';
-        
-        // Extract the filename (in case there's a folder path) and get the word before '_'
-        const filename = href.split('/').pop();
-        const currentPrefix = filename.split('_')[0];
+            listItems.forEach((li, index) => {
+                const aTag = li.querySelector('a');
+                if (!aTag) return; // Skip if no <a> tag exists
 
-        // If it's not the first item and the prefix changes, insert <hr> before this <li>
-        if (index > 0 && currentPrefix !== previousPrefix) {
-            const hr = document.createElement('hr');
-            li.parentNode.insertBefore(hr, li);
-        }
+                const href = aTag.getAttribute('href') || '';
 
-        previousPrefix = currentPrefix;
-    });
-});
+                // Extract the filename (in case there's a folder path) and get the word before '_'
+                const filename = href.split('/').pop();
+                const currentPrefix = filename.split('_')[0];
+
+                // If it's not the first item and the prefix changes, insert <hr> before this <li>
+                if (index > 0 && currentPrefix !== previousPrefix) {
+                    const hr = document.createElement('hr');
+                    li.parentNode.insertBefore(hr, li);
+                }
+
+                previousPrefix = currentPrefix;
+            });
+        });
     </script>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -92,14 +92,7 @@
 <main>
 <h1>My WordList</h1>
 <section>
-<ul><li><a href="shoehorn_learning.html">2026-10-18 : shoehorn_learning.html</a></li><li><a href="shoehorn_syllables.html">2026-10-18 : shoehorn_syllables.html</a></li><li><a href="shoehorn_cn2word.html">2026-10-18 : shoehorn_cn2word.html</a></li><li><a href="shoehorn_learning.html">2026-10-18 : shoehorn_learning.html</a></li><li><a href="shoehorn_syllables.html">2026-10-18 : shoehorn_syllables.html</a></li><li><a href="shoehorn_cn2word.html">2026-10-18 : shoehorn_cn2word.html</a></li><li><a href="undertow_learning.html">2026-10-18 : undertow_learning.html</a></li><li><a href="undertow_syllables.html">2026-10-18 : undertow_syllables.html</a></li><li><a href="undertow_cn2word.html">2026-10-18 : undertow_cn2word.html</a></li><li><a href="shoehorn_etc.html">2026-10-18 : shoehorn_etc.html</a></li><li><a href="shoehorn_syllables.html">2026-10-18 : shoehorn_syllables.html</a></li><li><a href="shoehorn_cn2word.html">2026-10-18 : shoehorn_cn2word.html</a></li><li><a href="undertow_etc.html">2026-10-16 : undertow_etc.html</a></li><li><a href="undertow_syllables.html">2026-10-16 : undertow_syllables.html</a></li><li><a href="undertow_cn2word.html">2026-10-16 : undertow_cn2word.html</a></li><li><a href="undertow_etc.html">2026-10-16 : undertow_etc.html</a></li><li><a href="undertow_syllables.html">2026-10-16 : undertow_syllables.html</a></li><li><a href="undertow_cn2word.html">2026-10-16 : undertow_cn2word.html</a></li><li><a href="undertow_cn2word.html">2026-10-16 : undertow_cn2word.html</a></li><li><a href="undertow_cn2word.html">2026-10-16 : undertow_cn2word.html</a></li><li><a href="chatoyancy_cn2word.html">2026-10-16 : chatoyancy_cn2word.html</a></li><li><a href="chatoyancy_cn2word.html">2026-10-16 : chatoyancy_cn2word.html</a></li><li><a href="chatoyancy_cn2word.html">2026-10-16 : chatoyancy_cn2word.html</a></li><li><a href="rostrum_etc.html">2026-10-16 : rostrum_etc.html</a></li><li><a href="rostrum_syllables.html">2026-10-16 : rostrum_syllables.html</a></li><li><a href="undertow_etc.html">2026-10-15 : undertow_etc.html</a></li><li><a href="undertow_syllables.html">2026-10-15 : undertow_syllables.html</a></li>
-<li><a href="Berber_syllables.html">2026-10-14 : Berber_syllables.html</a></li>
-<li><a href="Berber_Learning.html">2026-10-14 : Berber_etc.html</a></li>
-<li><a href="Berber_Examp.html">2026-10-14 : Berber_etc.html</a></li>
-<li><a href="chatoyancy_etc.html">2026-10-14 : chatoyancy_etc</a></li>
-<li><a href="chatoyancy_Learning.html">2026-10-14 : chatoyancy_etc</a></li>
-<li><a href="lister_etc.html">2026-10-14 : lister_etc</a></li>
-<li><a href="lister_Learning.html">2026-10-14 : lister_etc</a></li>
+<ul><li><a href="shoehorn_learning.html">2026-10-18 : shoehorn_learning.html</a></li><li><a href="shoehorn_syllables.html">2026-10-18 : shoehorn_syllables.html</a></li><li><a href="shoehorn_cn2word.html">2026-10-18 : shoehorn_cn2word.html</a></li>
 </ul>
 </section>
 </main>
