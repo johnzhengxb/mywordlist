@@ -2,7 +2,37 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
 <head>
+<script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'Enter') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
 
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+  
 <style class="audio-player">
 
    html, body {
@@ -164,7 +194,7 @@
       });
     });
 </script>
-<script class="syllables">
+<script class="Syllabification">
     document.addEventListener('DOMContentLoaded', () => {
     // 1. Select all buttons inside the specific container
     
@@ -205,31 +235,18 @@
         const totalPages = Math.ceil(items.length / itemsPerPage);
 
         function showPage(page) {
-        console.log ("page=")
-        console.log(page)
-        console.log("totalPages=")
-        console.log(totalPages)
 
 
-        if(page>totalPages){page=1};// 循环
+        if(page>totalPages) {page=1};// 循环
         currentPage = page;
-        console.log ("currentPage=")
-        console.log(currentPage)
 
         const start = (currentPage - 1) * itemsPerPage;
         const end = start + itemsPerPage;
-        console.log("start=")
-        console.log(start)
-        console.log("end=")
-        console.log(end)
-        console.log("currentPage=")
-        console.log(currentPage)
 
         items.forEach((item, index) => {
         if (index >= start && index < end) {
                 item.classList.add('active');
-                console.log ("active added")
-                item.getElementsByTagName("audio")[0].play();
+             //   item.getElementsByTagName("audio")[0].play();
         } else {
                 item.classList.remove('active');
         }
@@ -246,11 +263,7 @@
         });
 
         nextBtn.addEventListener('click', () => {
-        console.log("next clicked")
-        if (currentPage < totalPages) {
             showPage(currentPage + 1);
-        }
-
         });
 
         // Initialize first page view
