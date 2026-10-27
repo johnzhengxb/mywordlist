@@ -1,0 +1,4065 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Start: Style Part -->
+  <style class="Pagination">
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    div.pagination-controls {
+        width: 100% !important;
+        font-size: 1 rem !important;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        padding-right: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1000; /* Keeps it above other elements */
+     }
+
+   #prev-btn, #next-btn {
+        width: 25%;
+        height: 60px;
+        border-radius: 8px;
+        background-color: darkgreen;
+   }
+
+   #page-indicator {
+        display: inline-block;
+        padding-left: 10%;
+        text-align:center;
+        margin-left: auto;
+        margin-right: auto;
+   }
+
+   #next-btn {
+        margin-left: auto; /* 下一页按钮靠右对齐*/
+   }
+
+   .page-item {
+        display: none;  /* Hide all items by default */
+    }
+
+   .page-item.active {
+        display: block; /* Only show items belonging to the active page */
+        height: 100% !important;
+    }
+  </style>
+  <style class="Heading">
+   h1 {
+          width: 100% !important;
+          max-height: fit-content  !important;
+          padding: 2rem !important;
+          margin-bottom: 12px !important;
+          margin-top: 36px !important;
+          font-size: 3rem  !important;
+          background-color: darkgreen;
+          border-radius: 8px;
+        }
+  </style>
+  <style class="collapse-Expand">
+   details {
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            padding: 10px !important;
+            background: #012344;
+            margin-top:24px !important;
+        }
+
+        summary {
+            font-size:1rem !important;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            margin-left:12px !important;
+        }
+  </style>
+  <style class="audio-player">
+   .audio-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    margin-bottom: 12px;
+                    margin-top: 12px;
+                    padding: 1px 1px;
+                    border-radius: 12px;
+                    max-width: 100%;
+            }
+
+        .custom-play-btn {
+                height: 60px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+  </style>
+  <!-- End Style Part -->
+  <!-- Start Script Part -->
+  <script class="Pagination">
+   document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('.page-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 1;
+        const itemsPerPage = 1; // Change this to how many items you want per page
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        function showPage(page) {
+
+        if(page>totalPages){page=1};// 循环
+        currentPage = page;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        items.forEach((item, index) => {
+        if (index >= start && index < end) {
+                item.classList.add('active');
+                item.getElementsByTagName("audio")[0].play();
+        } else {
+                item.classList.remove('active');
+        }
+        });
+
+        // Update indicator and button states
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        // nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+        showPage(currentPage + 1);
+        });
+
+        // Initialize first page view
+        showPage(1);
+
+        });
+  </script>
+  <script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+  <script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.textContent = '⏸ Pause';
+          } else {
+            audio.pause();
+            btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          btn.textContent = '▶ Play';
+        });
+      });
+    });
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+  </script>
+  <script class="autocontrol">
+   $(document).ready(function() {
+    // When the HTML document has finished loading,
+    // set the opacity of all <h1> elements with class "hword" to 1 (fully visible).
+    $("h1.hword").css("opacity", "1");
+
+    // Set the opacity of all <em> elements to 1 (fully visible).
+    $("em").css("opacity", "1");
+
+    // Add a click event handler to every <h1 class="hword"> element.
+    $("h1.hword").click(function() {
+
+    // Make the clicked <h1> fully visible.
+    $(this).css("opacity", "1");
+
+    // Starting from the clicked <h1>, find its parent elements
+    // until reaching elements with class "outer-container",
+    // then find <em> elements inside those containers
+    // and make them fully visible.
+    $(this)
+        .parents(".outer-container")
+        .find("em")
+        .css("opacity", "1");
+    });
+
+
+    // Find every <div class="example_sentences">.
+    // For each one, go to its parent element and hide
+    // any <div class="on-web"> inside that parent.
+    $("div.example_sentences")
+        .parent()
+        .find("div.on-web")
+        .hide();
+
+    // Similarly, hide any <div class="in-sentences">
+    // inside the parent of each example_sentences element.
+    $("div.example_sentences")
+        .parent()
+        .find("div.in-sentences")
+        .hide();
+
+    // Add a double-click event handler to every
+    // <div class="example_sentences"> element.
+    $("div.example_sentences").dblclick(function() {
+
+        // When the example sentences are double-clicked,
+        // toggle the visibility of <div class="on-web">
+        // inside the same parent element.
+        //
+        // "toggle()" means:
+        //   visible -> hidden
+        //   hidden  -> visible
+        $(this)
+            .parent()
+            .find("div.on-web")
+            .toggle();
+
+        // Also toggle the visibility of <div class="in-sentences">
+        // inside the same parent element.
+        $(this)
+            .parent()
+            .find("div.in-sentences")
+            .toggle();
+        });
+  </script>
+  <!-- End: Script Part -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+  <title>
+   Stela Definition &amp; Meaning - Merriam-Webster
+  </title>
+  <link href="https://www.merriam-webster.com/dictionary/stela" rel="canonical"/>
+  <link href="/opensearch/dictionary.xml" rel="search" title="Merriam-Webster Dictionary" type="application/opensearchdescription+xml"/>
+  <link href="/favicon.svg" rel="icon"/>
+  <link color="#305f7a" href="/safari-pinned-tab.svg" rel="mask-icon"/>
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="144x144"/>
+  <link href="/site.webmanifest" rel="manifest"/>
+  <link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions.1f89efcf6947f2d77ef5.css" media="screen" rel="stylesheet"/>
+  <link as="style" href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions-defer.ad5d4ce4a1782dba8842.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
+  <style type="text/css">
+   .abl {display:none!important;}
+  </style>
+ </head>
+ <body class="no-touch definitions-page dictionary-lookup">
+  <div class="main-container page-item">
+   <div class="left-content col-lg-7 col-xl-8" id="left-content">
+    <span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+    </span>
+    <div class="row entry-header">
+     <div class="col-12">
+      <h1 class="hword">
+       stela
+      </h1>
+      <br/>
+     </div>
+    </div>
+    <div class="row entry-attr">
+     <div class="col">
+      <span class="fl">
+       <a class="important-blue-link" href="">
+        noun
+       </a>
+      </span>
+      <span class="prs">
+       <span class="first-slash">
+        \
+       </span>
+       <span class="pr">
+        ˈstē-lə
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+      </span>
+      <div class="audio-card">
+       <button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+       <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/stela001.mp3">
+       </audio>
+      </div>
+     </div>
+    </div>
+    <div class="row headword-row">
+     <div class="col">
+      <span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+        <span class="vl">
+         or
+        </span>
+        <span class="va" id="stele-anchor">
+         stele
+        </span>
+        <span class="first-slash">
+         \
+        </span>
+        <span class="prt-a">
+         <span class="mw">
+          ˈstē-​lē
+         </span>
+         <a class="play-pron" data-dir="s" data-file="stela002" data-lang="en_us" data-title="How to pronounce stela (audio)" href="/dictionary/stela?pronunciation&amp;lang=en_us&amp;dir=s&amp;file=stela002" title="How to pronounce stela (audio)">
+          <img alt="How to pronounce stela (audio)" class="svg" src="/images/svg/audio.svg"/>
+         </a>
+        </span>
+        <span class="last-slash">
+         \
+        </span>
+       </span>
+      </span>
+     </div>
+    </div>
+    <div class="row headword-row">
+     <div class="col">
+      <span class="vg-ins">
+       <span class="il plural">
+        plural
+       </span>
+       <span class="if">
+        stelae
+       </span>
+       <span class="first-slash">
+        \
+       </span>
+       <span class="prt-a">
+        <span class="mw">
+         ˈstē-​(ˌ)lē
+        </span>
+        <a class="play-pron" data-dir="s" data-file="stela003" data-lang="en_us" data-title="How to pronounce stela (audio)" href="/dictionary/stela?pronunciation&amp;lang=en_us&amp;dir=s&amp;file=stela003" title="How to pronounce stela (audio)">
+         <img alt="How to pronounce stela (audio)" class="svg" src="/images/svg/audio.svg"/>
+        </a>
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+       <span class="il or">
+        or
+       </span>
+       <span class="if">
+        steles
+       </span>
+      </span>
+     </div>
+    </div>
+    <details>
+     <summary>
+      Click for Explanations
+     </summary>
+     <div class="DictionaryEntries">
+      <div id="dictionary-entry-1">
+       <div class="row vg-header">
+        <div class="col">
+         <h2 class="">
+          Definition of
+          <em>
+           stela
+          </em>
+         </h2>
+         <p class="entryNumbers">
+         </p>
+        </div>
+       </div>
+       <div class="vg">
+        <div class="sb no-sn">
+         <span class="sb-0">
+          <div class="sense no-subnum">
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a usually carved or inscribed stone slab or pillar used for commemorative purposes
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+       </div>
+      </div>
+      <span id="anchor-seporator">
+      </span>
+      <div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+       <h2>
+        Examples of
+        <em>
+         stela
+        </em>
+        in a Sentence
+       </h2>
+       <div class="on-web">
+        <span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+        <span class="ex-sent sents" data-example-id="10728390">
+         <span class="t has-aq">
+          The standing stone—also known as a stele, or
+          <em>
+           stela
+          </em>
+          —measures 91 inches long and 41 inches wide.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Livia Gershon,
+           <em>
+            Smithsonian Magazine
+           </em>
+           , 23 June 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="9653436">
+         <span class="t has-aq">
+          Among the crosses were a dozen stone slabs, resembling
+          <em>
+           stela
+          </em>
+          .
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            New York Times
+           </em>
+           , 28 Feb. 2021
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="6126829">
+         <span class="t has-aq">
+          The relief sculpture is a nearly 2-foot-tall fragment of a large limestone
+          <em>
+           stela
+          </em>
+          , a commemorative slab carved to mark the warrior ruler’s authority.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            Los Angeles Times
+           </em>
+           , 11 Sep. 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="5289129">
+         <span class="t has-aq">
+          More than 1,300 years later, archaeologists working 32km (20 miles) north of Naranjo at a site now called Witzna discovered a
+          <em>
+           stela
+          </em>
+          bearing the location's ancient name: Bahlam Jol.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Kiona N. Smith,
+           <em>
+            Ars Technica
+           </em>
+           , 6 Aug. 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="5062339">
+         <span class="t has-aq">
+          The
+          <em>
+           stela
+          </em>
+          served as a legal document that established the role the queen was to play in the temple, together with a large donation of land and goods by Pharaoh Ahmose to the queen and her heirs.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            National Geographic
+           </em>
+           , 7 Mar. 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="1177770">
+         <span class="t has-aq">
+          The pharaoh had a gorgeous limestone
+          <em>
+           stela
+          </em>
+          made for Mentuwoser, to be placed at Abydos, where Osiris, the god of the afterlife, presided.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Salima Ikram,
+           <em>
+            Smithsonian
+           </em>
+           , 3 Feb. 2017
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="519672">
+         <span class="t has-aq">
+          At the cult center of Abydos, Osiris could watch over Mentuwoser, and pilgrims could say blessings, make offerings, or pour libations before the
+          <em>
+           stela
+          </em>
+          .
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Salima Ikram,
+           <em>
+            Smithsonian
+           </em>
+           , 3 Feb. 2017
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="389451">
+         <span class="t has-aq">
+          The
+          <em>
+           stela
+          </em>
+          , now on display at the Metropolitan Museum of Art, in New York City, shows Mentuwoser seated in front of a table bearing a massive amount of food.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Salima Ikram,
+           <em>
+            Smithsonian
+           </em>
+           , 3 Feb. 2017
+          </span>
+         </span>
+        </span>
+       </div>
+      </div>
+      <div class="widget firstknown-list" id="first-known-anchor">
+       <h2>
+        First Known Use of
+        <em>
+         stela
+        </em>
+       </h2>
+       <p class="ety-sl" data-entry-id="1">
+        1776, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+       </p>
+      </div>
+      <div class="widget etymology-list" id="etymology-anchor">
+       <h2>
+        History and Etymology for
+        <em>
+         stela
+        </em>
+       </h2>
+       <p class="et">
+        Latin &amp; Greek; Latin
+        <em class="mw_t_it">
+         stela
+        </em>
+        , from Greek
+        <em class="mw_t_it">
+         stēlē
+        </em>
+        ; akin to Old High German
+        <em class="mw_t_it">
+         stollo
+        </em>
+        pillar, Greek
+        <em class="mw_t_it">
+         stellein
+        </em>
+        to set up
+       </p>
+      </div>
+      <div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+      </div>
+      <div class="widget learn_more">
+      </div>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+     </div>
+    </details>
+   </div>
+  </div>
+ </body>
+ <div class="pagination-controls col-lg-7 col-xl-8 left-content">
+  <button id="prev-btn" type="button">
+   ◀ Previous
+  </button>
+  <span id="page-indicator">
+   Page 1 of 3
+  </span>
+  <button id="next-btn" type="button">
+   Next ▶
+  </button>
+ </div>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name ga-track-hom" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       cuneiform
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        adjective
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        kyü-ˈnē-ə-ˌfȯrm
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈkyü-n(ē-)ə-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/cuneif02.mp3">
+</audio>
+</div>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/cuneif01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           cuneiform
+          </em>
+</h2>
+<p class="entryNumbers">
+          (Entry 1 of 2)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             having the shape of a wedge
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             composed of or written in wedge-shaped characters
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+<span class="mw_t_sp">
+<span class="mw_t_wi">
+               cuneiform
+              </span>
+              syllabary
+             </span>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of cuneiform">
+              Online Etymolgy for cuneiform
+              <!-- -->
+<!-- -->
+              (adj.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               1670s, "wedge-shaped," from French
+               <span class="foreign notranslate">
+                cunéiforme
+               </span>
+               (16c.), from Latin
+               <span class="foreign notranslate">
+                cuneus
+               </span>
+               "a wedge, wedge-shaped thing," which is of unknown origin, + French
+               <span class="foreign notranslate">
+                -forme
+               </span>
+               (see
+               <a class="crossreference notranslate" href="/word/form#etymonline_v_11807" title="Etymology, meaning and definition of form ">
+                form
+               </a>
+               (n.)). German physician and traveler Engelbert Kämpfer (1681-1716) first applied the word to characters in ancient Middle Eastern inscriptions made with wedge-shaped writing tools; in English this sense is attested from 1818. As a noun, "cuneiform writing," by 1862.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1670s">
+               1670s
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="2" href="#" id="h2-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         cuneiform
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          noun
+         </a>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-2">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           cuneiform
+          </em>
+          (Entry 2 of 2)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt hasSdSense">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a cuneiform part
+            </span>
+</span>
+<span class="sdsense">
+<span class="sd">
+             specifically
+            </span>
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a cuneiform bone or cartilage
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             cuneiform writing
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="widget illustrations" id="art-anchor">
+<h2>
+        Illustration of
+        <em>
+         cuneiform
+        </em>
+</h2>
+<img alt="Illustration of cuneiform" class="lazyload" data-src="https://merriam-webster.com/assets/mw/static/art/dict/cuneifor.gif"/>
+<p class="function-label">
+        Noun
+       </p>
+<p class="caption">
+        cuneiform 2
+       </p>
+<p>
+        In the meaning defined
+        <a href="#h2">
+         above
+        </a>
+</p>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         cuneiform
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web: Noun
+        </span>
+<span class="ex-sent sents" data-example-id="11494126">
+<span class="t has-aq">
+          Johns becomes a scribe incising clay, making his own abstract
+          <em>
+           cuneiform
+          </em>
+          tablets.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jerry Saltz,
+           <em>
+            Vulture
+           </em>
+           , 22 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11494125">
+<span class="t has-aq">
+          On it,
+          <em>
+           cuneiform
+          </em>
+          text describes the opposite side, including details about the sizes of the fields.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Caroline Delbert,
+           <em>
+            Popular Mechanics
+           </em>
+           , 16 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11281197">
+<span class="t has-aq">
+          The recent return results from years of effort and includes thousands of
+          <em>
+           cuneiform
+          </em>
+          tablets, ancient seals, and other items.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lindsey Mcginnis,
+           <em>
+            The Christian Science Monitor
+           </em>
+           , 2 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11068738">
+<span class="t has-aq">
+          Federal authorities have taken ownership of a rare
+          <em>
+           cuneiform
+          </em>
+          tablet that craft company Hobby Lobby purchased in 2014 for the Museum of the Bible, a legal move that closes the latest chapter in the ongoing saga of the museum’s problematic collection.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 29 July 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10972433">
+<span class="t has-aq">
+          Those artifacts are among a half-million or so
+          <em>
+           cuneiform
+          </em>
+          tablets in museum collections around the world and are of interest to scholars and researchers.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 29 July 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10210130">
+<span class="t has-aq">
+          Beneath that are
+          <em>
+           cuneiform
+          </em>
+          writings on clay tablets, from between 3,000 to 2,000 BCE.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Cody Delistraty,
+           <em>
+            WSJ
+           </em>
+           , 28 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9994365">
+<span class="t has-aq">
+          Telling an aspiring writer to privilege crisp dialogue and an interior sense of character is like insisting toddlers study
+          <em>
+           cuneiform
+          </em>
+          before learning their ABCs.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Mark Athitakis,
+           <em>
+            Los Angeles Times
+           </em>
+           , 5 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9681294">
+<span class="t has-aq">
+          Bream consulted some university professors and learned to write some characters in
+          <em>
+           cuneiform
+          </em>
+          , creating pictures for chapters.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Cameron Fields,
+           <em>
+            cleveland
+           </em>
+           , 6 Mar. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         cuneiform
+        </em>
+</h2>
+<p class="function-label">
+        Adjective
+       </p>
+<p class="ety-sl" data-entry-id="1">
+        1677, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+<p class="function-label">
+        Noun
+       </p>
+<p class="ety-sl" data-entry-id="2">
+        1808, in the meaning defined at
+        <a href="#h2">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         cuneiform
+        </em>
+</h2>
+<p class="function-label">
+        Adjective
+       </p>
+<p class="et">
+        probably from French
+        <em class="mw_t_it">
+         cunéiforme
+        </em>
+        , from Middle French, from Latin
+        <em class="mw_t_it">
+         cuneus
+        </em>
+        + Middle French
+        <em class="mw_t_it">
+         -iforme
+        </em>
+        -iform
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name ga-track-hom" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       hieroglyphic
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        adjective
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˌhī-(ə-)rə-ˈgli-fik
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/h/hierog02.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+<span class="vl">
+         or less commonly
+        </span>
+<span class="va" id="hieroglyphical-anchor">
+         hieroglyphical
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˌhī-​(ə-​)rə-​ˈgli-​fi-​kəl
+         </span>
+<a class="play-pron" data-dir="h" data-file="hierog03" data-lang="en_us" data-title="How to pronounce hieroglyphic (audio)" href="/dictionary/hieroglyphic?pronunciation&amp;lang=en_us&amp;dir=h&amp;file=hierog03" title="How to pronounce hieroglyphic (audio)">
+<img alt="How to pronounce hieroglyphic (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+</span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           hieroglyphic
+          </em>
+</h2>
+<p class="entryNumbers">
+          (Entry 1 of 2)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             written in, constituting, or belonging to a system of writing mainly in pictorial characters
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             inscribed with hieroglyphic
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-3">
+<span class="num">
+             3
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             resembling hieroglyphic in difficulty of decipherment
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of hieroglyphic">
+              Online Etymolgy for hieroglyphic
+              <!-- -->
+<!-- -->
+              (adj.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               1580s, "of the nature of Egyptian monumental writing," from Late Latin
+               <span class="foreign notranslate">
+                hieroglyphicus
+               </span>
+               , from Greek
+               <span class="foreign notranslate">
+                hieroglyphikos
+               </span>
+               "hieroglyphic; of Egyptian writing," from
+               <span class="foreign notranslate">
+                hieros
+               </span>
+               "sacred" (see
+               <a class="crossreference notranslate" href="/word/ire" title="Etymology, meaning and definition of ire ">
+                ire
+               </a>
+               ) +
+               <span class="foreign notranslate">
+                glyphē
+               </span>
+               "carving," from
+               <span class="foreign notranslate">
+                glyphein
+               </span>
+               "to carve" (from PIE root
+               <a class="crossreference notranslate" href="/word/*gleubh-" title="Etymology, meaning and definition of *gleubh- ">
+                *gleubh-
+               </a>
+               "to tear apart, cleave").
+              </p>
+<p>
+               Plutarch began the custom of using the adjective (
+               <span class="foreign notranslate">
+                ta hieroglyphika
+               </span>
+               ) as a noun in reference to the Egyptian way of writing. The noun use of
+               <span class="foreign notranslate">
+                hieroglyphic
+               </span>
+               in English dates to 1580s (
+               <span class="foreign notranslate">
+                hieroglyphics
+               </span>
+               ). Related:
+               <span class="foreign notranslate">
+                Hieroglyphical
+               </span>
+               ;
+               <span class="foreign notranslate">
+                hieroglyphically
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1580s">
+               1580s
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="2" href="#" id="h2-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         hieroglyphic
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          noun
+         </a>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-2">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           hieroglyphic
+          </em>
+          (Entry 2 of 2)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/hieroglyph">
+<span class="text-uppercase">
+               hieroglyph
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt hasSdSense">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a system of hieroglyphic writing
+            </span>
+</span>
+<span class="sdsense">
+<span class="sd">
+             specifically
+            </span>
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the picture script of the ancient Egyptian priesthood
+            </span>
+<span class="uns">
+<span class="un">
+<span class="mdash">
+               —
+              </span>
+<span class="unText">
+               often used in plural but singular or plural in construction
+              </span>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-3">
+<span class="num">
+             3
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             something that resembles a
+             <a class="mw_t_a_link" href="/dictionary/hieroglyph">
+              hieroglyph
+             </a>
+             especially in difficulty of decipherment
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="widget illustrations" id="art-anchor">
+<h2>
+        Illustration of
+        <em>
+         hieroglyphic
+        </em>
+</h2>
+<img alt="Illustration of hieroglyphic" class="lazyload" data-src="https://merriam-webster.com/assets/mw/static/art/dict/hierogly.gif"/>
+<p class="function-label">
+        Noun
+       </p>
+<p class="caption">
+        hieroglyphic 2
+       </p>
+<p>
+        In the meaning defined
+        <a href="#h2">
+         above
+        </a>
+</p>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         hieroglyphic
+        </em>
+</h2>
+<p class="function-label">
+        Adjective
+       </p>
+<div class="uro">
+<span class="ure">
+         hieroglyphically
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˌhī-​(ə-​)rə-​ˈgli-​fi-​k(ə-​)lē
+         </span>
+<a class="play-pron" data-dir="h" data-file="hierog04" data-lang="en_us" data-title="How to pronounce hieroglyphic (audio)" href="/dictionary/hieroglyphic?pronunciation&amp;lang=en_us&amp;dir=h&amp;file=hierog04" title="How to pronounce hieroglyphic (audio)">
+<img alt="How to pronounce hieroglyphic (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         adverb
+        </span>
+</div>
+</div>
+<div class="widget little_gems little-gems-module-anchor-1" id="note-1-anchor">
+<h2>
+        Did you know?
+       </h2>
+<p class="function-label">
+        Adjective
+       </p>
+<p>
+        If hieroglyphic writing is "all Greek to you," you know more about the etymology of
+        <em>
+         hieroglyphic
+        </em>
+        than you might think. That word comes from the Greek
+        <em>
+         hieroglyphikos
+        </em>
+        , which means "sacred carving" (from
+        <em>
+         hieros
+        </em>
+        , meaning "sacred," and
+        <em>
+         glyphein
+        </em>
+        , meaning "to carve"). The ancient Greeks who named
+        <em>
+         hieroglyphic
+        </em>
+        writing reserved that term for the picture writing they found carved in temple walls or on public monuments in Egypt; it was distinguished from writings done in ink on papyrus or other smooth surfaces. But since making their first appearances in English in the 1580s, both the noun
+        <em>
+         hieroglyphics
+        </em>
+        and the adjective
+        <em>
+         hieroglyphic
+        </em>
+        have been extended to apply to the picture writing of various cultures, whether or not those writings were carved or sacred.
+       </p>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         hieroglyphic
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web: Adjective
+        </span>
+<span class="ex-sent sents" data-example-id="11650183">
+<span class="t has-aq">
+          Trottinettes—those narrow, elegant scooters—glide among the lanes, their drivers perfectly erect, one foot behind the other, like
+          <em>
+           hieroglyphic
+          </em>
+          Egyptian figures.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Roxana Robinson,
+           <em>
+            The New Yorker
+           </em>
+           , 11 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11434709">
+<span class="t has-aq">
+          Artifacts recovered from the rectangular graves include silver rings, funerary vessels and a seal bearing a
+          <em>
+           hieroglyphic
+          </em>
+          inscription.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Meilan Solly,
+           <em>
+            Smithsonian Magazine
+           </em>
+           , 28 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10587081">
+<span class="t has-aq">
+          When scholars initially discovered the El Palmar structure, archaeologists had just found a few other
+          <em>
+           hieroglyphic
+          </em>
+          staircases at Maya archaeological sites.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Isis Davis-marks,
+           <em>
+            Smithsonian Magazine
+           </em>
+           , 17 Mar. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10042259">
+<span class="t has-aq">
+          Today’s Mustafa Marie reports that the archaeologists examined
+          <em>
+           hieroglyphic
+          </em>
+          inscriptions on the lids of wine vessels and other containers for clues to the city’s history.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Livia Gershon,
+           <em>
+            Smithsonian Magazine
+           </em>
+           , 9 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10042260">
+<span class="t has-aq">
+          The archaeological team dated the settlement through
+          <em>
+           hieroglyphic
+          </em>
+          inscriptions found on wine vessels, as well as rings, scarabs, pottery and mud bricks bearing the seals of King Amenhotep III’s cartouche, the statement said.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 8 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9831480">
+<span class="t has-aq">
+          During this time, the Maya produced soaring pyramids and wondrous works of sculpture and painting, employed
+          <em>
+           hieroglyphic
+          </em>
+          writing and excelled at calendar-making and mathematics.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            NBC News
+           </em>
+           , 25 Mar. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9288328">
+<span class="t has-aq">
+          The Mayans were also fascinated by meteor showers: Studies of
+          <em>
+           hieroglyphic
+          </em>
+          records suggest that important occasions, such as royal coronations, were timed to coincide with the Eta Aquarid shower in the spring.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Amanda Foreman,
+           <em>
+            WSJ
+           </em>
+           , 1 Jan. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="8682732">
+<span class="t has-aq">
+          Evidence of the importance of the ‘stinking rose’ in ancient Egyptian culture can be found in the form of
+          <em>
+           hieroglyphic
+          </em>
+          inscriptions, illustrations and sculptures discovered in the tombs of pharaohs—along with traces of actual garlic.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Popular Science
+           </em>
+           , 22 Oct. 2020
+          </span>
+</span>
+</span>
+<span class="ex-header function-label">
+         Recent Examples on the Web: Noun
+        </span>
+<span class="ex-sent sents" data-example-id="7596519">
+<span class="t has-aq">
+          The farmers, truckers and others who traverse these rural roads, though, could quickly tell you what the
+          <em>
+           hieroglyphics
+          </em>
+          mean: Help.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Patricia Cohen,
+           <em>
+            New York Times
+           </em>
+           , 18 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="7496765">
+<span class="t has-aq">
+          The board lacks the
+          <em>
+           hieroglyphics
+          </em>
+          symbolizing the soul, but square 27—which in earlier boards featured a simple X—now carries a hieroglyphic symbol for water.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Colin Barras,
+           <em>
+            Science | AAAS
+           </em>
+           , 6 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6968640">
+<span class="t has-aq">
+          Earlier game boards boast completely blank playing squares, but in most later versions, the final five squares feature
+          <em>
+           hieroglyphics
+          </em>
+          denoting special playing circumstances.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Meilan Solly,
+           <em>
+            Smithsonian Magazine
+           </em>
+           , 6 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6860518">
+<span class="t has-aq">
+          Early in the meditative travel drama Luxor, a woman crumples in front of a colossal stone wall carved with Egyptian
+          <em>
+           hieroglyphics
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Inkoo Kang,
+           <em>
+            The Hollywood Reporter
+           </em>
+           , 4 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6751396">
+<span class="t has-aq">
+          Although the game fell out of popularity, the history of senet remains embedded in
+          <em>
+           hieroglyphics
+          </em>
+          and ancient artifacts—and with humanity itself.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Daisy Hernandez,
+           <em>
+            Popular Mechanics
+           </em>
+           , 11 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6639290">
+<span class="t has-aq">
+          Yet even unreadable texts—cuneiforms,
+          <em>
+           hieroglyphics
+          </em>
+          , glyphs—declare (even before they are decoded) the solid existence of the past.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Helen Vendler,
+           <em>
+            Harper's magazine
+           </em>
+           , 20 Jan. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6535252">
+<span class="t has-aq">
+          Step 7: Realize there are no written words in the instructions, only drawings that look like indecipherable
+          <em>
+           hieroglyphics
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Sally Schwartz Higginson,
+           <em>
+            chicagotribune.com
+           </em>
+           , 17 Oct. 2019
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6423357">
+<span class="t has-aq">
+          In 1960, Dows Dunham, a curator at the MFA Boston, translated the
+          <em>
+           hieroglyphics
+          </em>
+          on the coffin and discovered the corpse’s name: Padihershef.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 9 Oct. 2019
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         hieroglyphic
+        </em>
+</h2>
+<p class="function-label">
+        Adjective
+       </p>
+<p class="ety-sl" data-entry-id="1">
+        1585, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+<p class="function-label">
+        Noun
+       </p>
+<p class="ety-sl" data-entry-id="2">
+        1586, in the meaning defined at
+        <a href="#h2">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         hieroglyphic
+        </em>
+</h2>
+<p class="function-label">
+        Adjective
+       </p>
+<p class="et">
+        Middle French
+        <em class="mw_t_it">
+         hieroglyphique
+        </em>
+        , from Late Latin
+        <em class="mw_t_it">
+         hieroglyphicus
+        </em>
+        , from Greek
+        <em class="mw_t_it">
+         hieroglyphikos
+        </em>
+        , from
+        <em class="mw_t_it">
+         hieros
+        </em>
+        +
+        <em class="mw_t_it">
+         glyphein
+        </em>
+        to carve  — more at
+        <a class="mw_t_mat" href="/dictionary/cleave#etymology">
+         cleave
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name ga-track-hom" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       covenant
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈkəv-nənt
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈkə-və-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/covena01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="learners-essential-meaning">
+<div class="row vg-header">
+<div class="col">
+<p class="subheader-md hword2 english-learners">
+        Essential Meaning of
+        <em>
+         covenant
+        </em>
+</p>
+</div>
+</div>
+<div class="learners-def">
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+            1
+           </span>
+</span>
+<span class="sl">
+           formal
+          </span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+             :
+            </strong>
+            a formal and serious agreement or promise
+           </span>
+<span class="ex-sent first-child t no-aq sents">
+            a
+            <em class="mw_t_it">
+             covenant
+            </em>
+            with God
+           </span>
+<span class="ex-sent t no-aq sents">
+            the
+            <em class="mw_t_it">
+             covenant
+            </em>
+            of marriage
+           </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+            2
+           </span>
+</span>
+<span class="sl">
+           law
+          </span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+             :
+            </strong>
+            a formal written agreement between two or more people, businesses, countries, etc.
+           </span>
+<span class="ex-sent first-child t no-aq sents">
+            an international
+            <em class="mw_t_it">
+             covenant
+            </em>
+            on human rights
+           </span>
+<span class="ex-sent t no-aq sents">
+            The restrictive
+            <em class="mw_t_it">
+             covenants
+            </em>
+            of the building development prohibit the construction of buildings over 30 feet tall.
+           </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Full Definition of
+          <em>
+           covenant
+          </em>
+</h2>
+<p class="entryNumbers">
+          (Entry 1 of 2)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a usually formal, solemn, and binding agreement
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/compact">
+<span class="text-uppercase">
+               compact
+              </span>
+</a>
+</span>
+<span class="ex-sent first-child t has-aq sents">
+             … international law, which depends upon the sanctity of
+             <span class="mw_t_wi">
+              covenants
+             </span>
+             between rulers.
+            </span>
+<span class="ex-sent aq has-aq sents">
+<span class="aq">
+<span class="auth">
+               — George H. Sabine
+              </span>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-2 a">
+<span class="num">
+             2
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a written agreement or promise usually under seal between two or more parties especially for the performance of some action
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             the deed conveying the land contained restrictive
+             <span class="mw_t_wi">
+              covenants
+             </span>
+</span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the common-law action to recover damages for breach of such a contract
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of covenant">
+              Online Etymolgy for covenant
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               c. 1300,
+               <span class="foreign notranslate">
+                covenaunt
+               </span>
+               , "mutual compact to do or not do something, a contract," from Old French
+               <span class="foreign notranslate">
+                covenant, convenant
+               </span>
+               "agreement, pact, promise" (12c.), originally present participle of
+               <span class="foreign notranslate">
+                covenir
+               </span>
+               "agree, meet," from Latin
+               <span class="foreign notranslate">
+                convenire
+               </span>
+               "come together, unite; be suitable, agree," from
+               <span class="foreign notranslate">
+                com-
+               </span>
+               "together" (see
+               <a class="crossreference notranslate" href="/word/com-" title="Etymology, meaning and definition of com- ">
+                com-
+               </a>
+               ) +
+               <span class="foreign notranslate">
+                venire
+               </span>
+               "to come," from a suffixed form of PIE root
+               <a class="crossreference notranslate" href="/word/*gwa-" title="Etymology, meaning and definition of *gwa- ">
+                *gwa-
+               </a>
+               "to go, come."
+              </p>
+<p>
+               In law, "a promise made by deed" (late 14c.). Applied in Scripture to God's arrangements with man as a translation of Latin
+               <span class="foreign notranslate">
+                testamentum
+               </span>
+               , Greek
+               <span class="foreign notranslate">
+                diatheke
+               </span>
+               , both rendering Hebrew
+               <span class="foreign notranslate">
+                berith
+               </span>
+               (though
+               <span class="foreign notranslate">
+                testament
+               </span>
+               also is used for the same word in different places). Meaning "solemn agreement between members of a church" is from 1630s; specifically those of the Scottish Presbyterians in 1638 and 1643 (see
+               <a class="crossreference notranslate" href="/word/covenanter" title="Etymology, meaning and definition of covenanter ">
+                covenanter
+               </a>
+               ).
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:c.%201300">
+               c. 1300
+              </a>
+</div>
+</div>
+</div>
+</div>
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<div id="etymonline_v_46724" style="position:absolute;top:-100px">
+</div>
+<p class="word__name--TTbAA" title="Origin and meaning of covenant">
+              covenant
+              <!-- -->
+<!-- -->
+              (v.)
+             </p>
+<section class="word__defination--2q7ZH">
+<p>
+               "to enter into a formal agreement or contract," c. 1300, from
+               <a class="crossreference notranslate" href="/word/covenant#etymonline_v_19192" title="Etymology, meaning and definition of covenant ">
+                covenant
+               </a>
+               (n.). Related:
+               <span class="foreign notranslate">
+                Covenanted
+               </span>
+               ;
+               <span class="foreign notranslate">
+                covenanting
+               </span>
+               . Also see
+               <a class="crossreference notranslate" href="/word/covenanter" title="Etymology, meaning and definition of covenanter ">
+                covenanter
+               </a>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:c.%201300">
+               c. 1300
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="2" href="#" id="h2-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         covenant
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          verb
+         </a>
+</span>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="prs">
+<span class="syl-break">
+          |
+         </span>
+<span class="first-slash">
+          \
+         </span>
+<span class="pr">
+          ˈkəv-nənt
+         </span>
+<span class="addPunct">
+          ,
+         </span>
+<span class="pr">
+          -ˌnant
+         </span>
+<span class="addPunct">
+          ,
+         </span>
+<span class="pr">
+          ˈkə-və-
+         </span>
+<span class="last-slash">
+          \
+         </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+          ▶ Play
+         </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/covena01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="if">
+          covenanted
+         </span>
+<span class="sep-semicolon">
+          ;
+         </span>
+<span class="if">
+          covenanting
+         </span>
+<span class="sep-semicolon">
+          ;
+         </span>
+<span class="if">
+          covenants
+         </span>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-2">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           covenant
+          </em>
+          (Entry 2 of 2)
+         </p>
+</div>
+</div>
+<div class="vg">
+<p class="vd firstVd">
+<a class="important-blue-link" href="">
+          transitive verb
+         </a>
+</p>
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to promise by a covenant
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/pledge">
+<span class="text-uppercase">
+               pledge
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+<div class="vg">
+<p class="vd">
+<a class="important-blue-link" href="">
+          intransitive verb
+         </a>
+</p>
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to enter into a covenant
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/contract">
+<span class="text-uppercase">
+               contract
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         covenant
+        </em>
+</h2>
+<p class="function-label">
+        Noun
+       </p>
+<div class="uro">
+<span class="ure">
+         covenantal
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˌkə-​və-​ˈnan-​tᵊl
+         </span>
+<a class="play-pron" data-dir="c" data-file="covena02" data-lang="en_us" data-title="How to pronounce covenant (audio)" href="/dictionary/covenant?pronunciation&amp;lang=en_us&amp;dir=c&amp;file=covena02" title="How to pronounce covenant (audio)">
+<img alt="How to pronounce covenant (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         adjective
+        </span>
+</div>
+</div>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms &amp; Antonyms for
+        <em>
+         covenant
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms: Noun
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/accord">
+          accord
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/alliance">
+          alliance
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/compact">
+          compact
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/convention">
+          convention
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/pact">
+          pact
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/treaty">
+          treaty
+         </a>
+</li>
+</ul>
+<p class="function-label">
+        Synonyms: Verb
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/agree">
+          agree
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/bargain">
+          bargain
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/contract">
+          contract
+         </a>
+</li>
+</ul>
+<p class="function-label">
+        Antonyms: Verb
+       </p>
+<ul class="mw-list">
+<li>
+<a class="syn-last" href="/dictionary/disagree">
+          disagree
+         </a>
+</li>
+</ul>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         covenant
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-header function-label">
+         Noun
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         an international
+         <em class="mw_t_it">
+          covenant
+         </em>
+         on human rights
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         The restrictive
+         <em class="mw_t_it">
+          covenants
+         </em>
+         of the building development prohibit the construction of buildings over 30 feet tall.
+        </span>
+<span class="ex-header function-label">
+         Verb
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         a traditional rule held that a husband could not enter into a covenant with his wife, because that was the equivalent of
+         <em class="mw_t_it">
+          covenanting
+         </em>
+         with himself
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         the home buyers had to
+         <em class="mw_t_it">
+          covenant
+         </em>
+         that they would restore and keep the house for at least 10 years in exchange for a low mortgage rate
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web: Noun
+        </span>
+<span class="ex-sent sents" data-example-id="11927047">
+<span class="t has-aq">
+          In this brutally unequal world, isn’t that part of the
+          <em>
+           covenant
+          </em>
+          with our pets?
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Gene Weingarten,
+           <em>
+            Washington Post
+           </em>
+           , 8 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11927048">
+<span class="t has-aq">
+          While Alma still has a formal
+          <em>
+           covenant
+          </em>
+          with the Presbyterian Synod, the school has no statement of faith or beliefs students have to sign.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Freep.com
+           </em>
+           , 8 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11818787">
+<span class="t has-aq">
+          The
+          <em>
+           covenant
+          </em>
+          was designed to eliminate concern that the center, should Russell Group decide to abandon the project down the road, could be turned into an apartment complex or other transient housing.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Michelle L. Quinn,
+           <em>
+            chicagotribune.com
+           </em>
+           , 2 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11718984">
+<span class="t has-aq">
+          That sale agreement included a
+          <em>
+           covenant
+          </em>
+          barring him from competing with his former business.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Tom Daykin,
+           <em>
+            Milwaukee Journal Sentinel
+           </em>
+           , 18 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11718985">
+<span class="t has-aq">
+          They are based on the fact that most of us buy into a social
+          <em>
+           covenant
+          </em>
+          and a few wannabe hackers doctoring PDFs in their parents’ basements aren’t going to change that.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Courtney Shea,
+           <em>
+            refinery29.com
+           </em>
+           , 8 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11611214">
+<span class="t has-aq">
+          The last room on the tour was the sealing room, in which marriages are performed and families enter a
+          <em>
+           covenant
+          </em>
+          to be bound together for eternity.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Brieanna J. Frank,
+           <em>
+            The Arizona Republic
+           </em>
+           , 12 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11611212">
+<span class="t has-aq">
+          And like Sandquist and other students at Grace, the lifestyle
+          <em>
+           covenant
+          </em>
+          fit right in with his beliefs.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Freep.com
+           </em>
+           , 8 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11611213">
+<span class="t has-aq">
+          Passed down through the centuries and closely guarded by the priests of Egypt as part of their divine
+          <em>
+           covenant
+          </em>
+          , its formula was stolen by a Greek thief and lost forever after the fall of the Roman Empire.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Benjamín Labatut,
+           <em>
+            Harper's Magazine
+           </em>
+           , 28 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-header function-label">
+         Recent Examples on the Web: Verb
+        </span>
+<span class="ex-sent sents" data-example-id="115107">
+<span class="t has-aq">
+          USA TODAY NETWORK
+LOS ANGELES — Alien:
+          <em>
+           Covenant
+          </em>
+          edged out Guardians of the Galaxy Vol. 2 in a weekend space battle at the box office.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Sandy Cohen,
+           <em>
+            USA TODAY
+           </em>
+           , 21 May 2017
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         covenant
+        </em>
+</h2>
+<p class="function-label">
+        Noun
+       </p>
+<p class="ety-sl" data-entry-id="1">
+        14th century, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+<p class="function-label">
+        Verb
+       </p>
+<p class="ety-sl" data-entry-id="2">
+        14th century, in the meaning defined at
+        <a href="#h2">
+         transitive sense
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         covenant
+        </em>
+</h2>
+<p class="function-label">
+        Noun and Verb
+       </p>
+<p class="et">
+        Middle English, from Anglo-French, from present participle of
+        <em class="mw_t_it">
+         covenir
+        </em>
+        to be fitting, from Latin
+        <em class="mw_t_it">
+         convenire
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       diaspora
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        dī-ˈa-sp(ə-)rə
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        dē-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/diaspo01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           diaspora
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num has-let">
+<span class="sb-0">
+<span class="sen has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="lb">
+            capitalized
+           </span>
+           ,
+           <span class="sl">
+            Judaism
+           </span>
+</span>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-a">
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the Jews living outside Palestine or modern Israel
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             members of the
+             <span class="mw_t_wi">
+              Diaspora
+             </span>
+</span>
+</span>
+</div>
+</span>
+<span class="sb-2">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the settling of scattered colonies of Jews outside ancient
+             <a class="mw_t_d_link" href="/dictionary/Palestine#g">
+              Palestine
+             </a>
+             after the Babylonian exile
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-3">
+<div class="sense has-sn">
+<span class="sn sense-c">
+<span class="letter">
+             c
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the area outside ancient Palestine settled by Jews
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-2 a">
+<span class="num">
+             2
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             people settled far from their ancestral homelands
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             members of the African
+             <span class="mw_t_wi">
+              diaspora
+             </span>
+</span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the place where these people live
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-2">
+<div class="sense has-sn">
+<span class="sn sense-c">
+<span class="letter">
+             c
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the movement, migration, or scattering of a people away from an established or ancestral homeland
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             the black
+             <span class="mw_t_wi">
+              diaspora
+             </span>
+             to northern cities
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of diaspora">
+              Online Etymolgy for diaspora
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               1825 in reference to Moravian protestants; 1869 in reference to the dispersion of the Jews; from Greek
+               <span class="foreign notranslate">
+                diaspora
+               </span>
+               "dispersion," from
+               <span class="foreign notranslate">
+                diaspeirein
+               </span>
+               "to scatter about, disperse," from
+               <span class="foreign notranslate">
+                dia
+               </span>
+               "about, across" (see
+               <a class="crossreference notranslate" href="/word/dia-" title="Etymology, meaning and definition of dia- ">
+                dia-
+               </a>
+               ) +
+               <span class="foreign notranslate">
+                speirein
+               </span>
+               "to scatter" (see
+               <a class="crossreference notranslate" href="/word/sparse" title="Etymology, meaning and definition of sparse ">
+                sparse
+               </a>
+               ). The Greek word was used in Septuagint in Deuteronomy xxviii.25. A Hebrew word for it is
+               <span class="foreign notranslate">
+                galuth
+               </span>
+               "exile." The earlier word for it in English was Latinate
+               <a class="crossreference notranslate" href="/word/dispersion" title="Etymology, meaning and definition of dispersion ">
+                dispersion
+               </a>
+               (late 14c.). Related:
+               <span class="foreign notranslate">
+                Diasporic
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1825">
+               1825
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         diaspora
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         diasporic
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˌdī-​ə-​ˈspȯr-​ik
+         </span>
+<a class="play-pron" data-dir="d" data-file="diasp01v" data-lang="en_us" data-title="How to pronounce diaspora (audio)" href="/dictionary/diaspora?pronunciation&amp;lang=en_us&amp;dir=d&amp;file=diasp01v" title="How to pronounce diaspora (audio)">
+<img alt="How to pronounce diaspora (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         adjective
+        </span>
+</div>
+</div>
+<div class="widget little_gems little-gems-module-anchor-1" id="note-1-anchor">
+<h2>
+        The Beginnings of the Word
+        <span class="mw_t_parahw">
+         Diaspora
+        </span>
+</h2>
+<p>
+        Until recently
+        <em>
+         diaspora
+        </em>
+        was thought to be a fairly new word in English to describe a very old thing (its first, and principal, meaning relates to the settling of the Jewish people outside of Palestine after the Babylonian exile thousands of years ago). However, recent research has found that the word is quite a bit older than previously thought.
+It can be found as far back as 1594, in a translation of Lambert Daneau’s A Fruitfull Commentarie vpon the Twelue Small Prophets: “This scattering abrode of the Iewes, as it were an heauenly sowing, fell out after their returne from the captiuitie of Babylon … they are called Diaspora, that is, a scattering or sowing abrode.”
+        <em>
+         Diaspora
+        </em>
+        is descended from the Greek word
+        <em>
+         diaspeirein
+        </em>
+        , meaning “to scatter, spread about.”
+       </p>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         diaspora
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11855966">
+<span class="t has-aq">
+          Sakhalin Koreans have campaigned for years for the entire
+          <em>
+           diaspora
+          </em>
+          to have the right to claim South Korean citizenship.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            New York Times
+           </em>
+           , 7 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855967">
+<span class="t has-aq">
+          The Cambodian-American
+          <em>
+           diaspora
+          </em>
+          began taking shape in 1975, when the first wave of Cambodian refugees came to the States to escape the brutal Khmer Rouge regime that left two million dead.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Maryam Jillani,
+           <em>
+            Condé Nast Traveler
+           </em>
+           , 6 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855968">
+<span class="t has-aq">
+          This exodus might be a bleak sign for Africa’s future human capital, but for startups like Lemonade, there’s an opportunity to give the
+          <em>
+           diaspora
+          </em>
+          a financial connection to family and business partners.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Alexander Onukwue,
+           <em>
+            Quartz
+           </em>
+           , 3 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855969">
+<span class="t has-aq">
+          The Old Testament says Jewish people, considered an ethnoreligious group and a nation, originated from the Israelites and Hebrews of historical Israel and Judah but over time were forced out by various rulers creating the vast
+          <em>
+           diaspora
+          </em>
+          seen today.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Allison Norlian,
+           <em>
+            Forbes
+           </em>
+           , 3 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855970">
+<span class="t has-aq">
+          This book is for teens and adults, folks in the Latinx
+          <em>
+           diaspora
+          </em>
+          who are desperately wanting to be seen.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Nicole Chavez,
+           <em>
+            CNN
+           </em>
+           , 2 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855971">
+<span class="t has-aq">
+          Sudanese nationals abroad and
+          <em>
+           diaspora
+          </em>
+          groups have also been protesting in front of embassies in cities such as London and Paris.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            BostonGlobe.com
+           </em>
+           , 26 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855972">
+<span class="t has-aq">
+          There’s another kind of adobo for which many people in the Puerto Rican
+          <em>
+           diaspora
+          </em>
+          have affection: the dry seasoning that comes in a plastic shaker, launched by Goya in 1966.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Bettina Makalintal,
+           <em>
+            Bon Appétit
+           </em>
+           , 19 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11855973">
+<span class="t has-aq">
+          The country’s hyperinflation, rampant violence, hunger and deepening poverty have forced many into a new
+          <em>
+           diaspora
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Orge Castellano,
+           <em>
+            sun-sentinel.com
+           </em>
+           , 13 Oct. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         diaspora
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1594, in the meaning defined at
+        <a href="#h1">
+         sense 1b
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         diaspora
+        </em>
+</h2>
+<p class="et">
+        Greek, dispersion, from
+        <em class="mw_t_it">
+         diaspeirein
+        </em>
+        to scatter, from
+        <em class="mw_t_it">
+         dia-
+        </em>
+        +
+        <em class="mw_t_it">
+         speirein
+        </em>
+        to sow
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       caliph
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈkā-ləf
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈka-ləf
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/caliph01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+<span class="vl">
+         or less commonly
+        </span>
+<span class="va" id="calif-anchor">
+         calif
+        </span>
+</span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           caliph
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a successor of Muhammad as temporal (see
+             <a class="mw_t_dxt" href="/dictionary/temporal#h1">
+<span class="text-uppercase">
+               temporal
+              </span>
+<span class="text-lowercase">
+               entry
+              </span>
+              1
+              <span class="text-lowercase">
+               sense 1c
+              </span>
+</a>
+             ) and spiritual head of Islam
+            </span>
+<span class="uns">
+<span class="un">
+<span class="mdash">
+               —
+              </span>
+<span class="unText">
+               used as a title
+              </span>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of caliph">
+              Online Etymolgy for caliph
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               late 14c., "ruler of a Muslim country," from Old French
+               <span class="foreign notranslate">
+                caliphe
+               </span>
+               (12c., also
+               <span class="foreign notranslate">
+                algalife
+               </span>
+               ), from Medieval Latin
+               <span class="foreign notranslate">
+                califa
+               </span>
+               , from Arabic
+               <span class="foreign notranslate">
+                khalifa
+               </span>
+               "successor" (from
+               <span class="foreign notranslate">
+                khalafa
+               </span>
+               "succeed"). The title given to the successor of Muhammad as leader of the community and defender of the faith; the first was Abu-Bakr, who succeeded Muhammad in the role of leader of the faithful after the prophet's death.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:late%2014c.">
+               late 14c.
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         caliph
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         caliphal
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˈkā-​lə-​fəl
+         </span>
+<a class="play-pron" data-dir="c" data-file="caliph03" data-lang="en_us" data-title="How to pronounce caliph (audio)" href="/dictionary/caliph?pronunciation&amp;lang=en_us&amp;dir=c&amp;file=caliph03" title="How to pronounce caliph (audio)">
+<img alt="How to pronounce caliph (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+<span class="addPunct">
+          ,
+         </span>
+<span class="mw">
+          ˈka-​
+         </span>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         adjective
+        </span>
+</div>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         caliph
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="10165646">
+<span class="t has-aq">
+          The country’s ruler, the Albanian commander Muhammad Ali, ended Mamluk rule, secured near independence from the Ottoman
+          <em>
+           caliph
+          </em>
+          , and embarked on modernizing the country in an attempt to catch up with the West.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ursula Lindsey,
+           <em>
+            The New York Review of Books
+           </em>
+           , 27 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9950286">
+<span class="t has-aq">
+          Fate follows a beggar king, his daughter, a dancer, and the
+          <em>
+           caliph
+          </em>
+          and grand vizier of Baghdad.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ed Stockly,
+           <em>
+            Los Angeles Times
+           </em>
+           , 9 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9639024">
+<span class="t has-aq">
+          Already in 2012, people were living as if Baghdadi was the
+          <em>
+           caliph
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Karl Vick,
+           <em>
+            Time
+           </em>
+           , 25 Feb. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="8592748">
+<span class="t has-aq">
+          Hussain had been invited by the inhabitants of Kufa, which was a garrison town near Najaf, to come and lead them in a revolt against the Umayyad
+          <em>
+           caliph
+          </em>
+          in Damascus.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Edith Szanto,
+           <em>
+            The Conversation
+           </em>
+           , 9 Sep. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="8592749">
+<span class="t has-aq">
+          Hussain had been invited by the inhabitants of Kufa, which was a garrison town near Najaf, to come and lead them in a revolt against the Umayyad
+          <em>
+           caliph
+          </em>
+          in Damascus.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Edith Szanto,
+           <em>
+            chicagotribune.com
+           </em>
+           , 9 Sep. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="8304056">
+<span class="t has-aq">
+          For example, Mutawakkil, a
+          <em>
+           caliph
+          </em>
+          of the Abbasid dynasty, which ruled over a vast Islamic empire from the eighth to the 13th century, feared that the rituals inflamed anti-regime fervor.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Edith Szanto,
+           <em>
+            The Conversation
+           </em>
+           , 9 Sep. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="8304057">
+<span class="t has-aq">
+          For example, Mutawakkil, a
+          <em>
+           caliph
+          </em>
+          of the Abbasid dynasty, which ruled over a vast Islamic empire from the eighth to the 13th century, feared that the rituals inflamed anti-regime fervor.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Edith Szanto,
+           <em>
+            chicagotribune.com
+           </em>
+           , 9 Sep. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="7414808">
+<span class="t has-aq">
+          The meaning of the new nom de guerre was not lost on his future followers: Abu Bakr was the first
+          <em>
+           caliph
+          </em>
+          after the Prophet Muhammad’s death in ancient Arabia and is credited with the wave of Islamic expansion that followed.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Rukmini Callimachi,
+           <em>
+            New York Times
+           </em>
+           , 27 Oct. 2019
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         caliph
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        14th century, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         caliph
+        </em>
+</h2>
+<p class="et">
+        Middle English
+        <em class="mw_t_it">
+         caliphe
+        </em>
+        , from Middle French
+        <em class="mw_t_it">
+         calife
+        </em>
+        , from Arabic
+        <em class="mw_t_it">
+         khalīfa
+        </em>
+        successor
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Ramadan
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈrä-mə-ˌdän
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˌrä-mə-ˈdän
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/ramada01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Ramadan
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the ninth month of the Islamic year observed as sacred with fasting practiced daily from dawn to sunset
+             <span class="dx-jump">
+              — see
+              <a class="mw_t_dxt" href="/dictionary/month#table">
+               Months of the Principal Calendars Table
+              </a>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Ramadan">
+              Online Etymolgy for Ramadan
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               ninth month of the Muslim year, period of the annual thirty-days' fast, 1590s, earlier
+               <span class="foreign notranslate">
+                Ramazan
+               </span>
+               (c. 1500), from Arabic
+               <span class="foreign notranslate">
+                Ramadan
+               </span>
+               (Turkish and Persian
+               <span class="foreign notranslate">
+                ramazan
+               </span>
+               ), originally "the hot month," from
+               <span class="foreign notranslate">
+                ramida
+               </span>
+               "be burnt, scorched" (compare Mishnaic Hebrew
+               <span class="foreign notranslate">
+                remetz
+               </span>
+               "hot ashes, embers"). In the Islamic lunar calendar, it passes through all seasons in a cycle of about 33 years, but evidently originally it was a summer month.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1590s">
+               1590s
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         Ramadan
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        circa 1595, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         Ramadan
+        </em>
+</h2>
+<p class="et">
+        Arabic
+        <em class="mw_t_it">
+         Ramaḍān
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body></html>
