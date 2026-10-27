@@ -1,0 +1,3487 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Start: Style Part -->
+  <style class="Pagination">
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    div.pagination-controls {
+        width: 100% !important;
+        font-size: 1 rem !important;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        padding-right: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1000; /* Keeps it above other elements */
+     }
+
+   #prev-btn, #next-btn {
+        width: 25%;
+        height: 60px;
+        border-radius: 8px;
+        background-color: darkgreen;
+   }
+
+   #page-indicator {
+        display: inline-block;
+        padding-left: 10%;
+        text-align:center;
+        margin-left: auto;
+        margin-right: auto;
+   }
+
+   #next-btn {
+        margin-left: auto; /* 下一页按钮靠右对齐*/
+   }
+
+   .page-item {
+        display: none;  /* Hide all items by default */
+    }
+
+   .page-item.active {
+        display: block; /* Only show items belonging to the active page */
+        height: 100% !important;
+    }
+  </style>
+  <style class="Heading">
+   h1 {
+          width: 100% !important;
+          max-height: fit-content  !important;
+          padding: 2rem !important;
+          margin-bottom: 12px !important;
+          margin-top: 36px !important;
+          font-size: 3rem  !important;
+          background-color: darkgreen;
+          border-radius: 8px;
+        }
+  </style>
+  <style class="collapse-Expand">
+   details {
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            padding: 10px !important;
+            background: #012344;
+            margin-top:24px !important;
+        }
+
+        summary {
+            font-size:1rem !important;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            margin-left:12px !important;
+        }
+  </style>
+  <style class="audio-player">
+   .audio-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    margin-bottom: 12px;
+                    margin-top: 12px;
+                    padding: 1px 1px;
+                    border-radius: 12px;
+                    max-width: 100%;
+            }
+
+        .custom-play-btn {
+                height: 60px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+  </style>
+  <!-- End Style Part -->
+  <!-- Start Script Part -->
+  <script class="Pagination">
+   document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('.page-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 1;
+        const itemsPerPage = 1; // Change this to how many items you want per page
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        function showPage(page) {
+
+        if(page>totalPages){page=1};// 循环
+        currentPage = page;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        items.forEach((item, index) => {
+        if (index >= start && index < end) {
+                item.classList.add('active');
+                item.getElementsByTagName("audio")[0].play();
+        } else {
+                item.classList.remove('active');
+        }
+        });
+
+        // Update indicator and button states
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        // nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+        showPage(currentPage + 1);
+        });
+
+        // Initialize first page view
+        showPage(1);
+
+        });
+  </script>
+  <script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+  <script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.textContent = '⏸ Pause';
+          } else {
+            audio.pause();
+            btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          btn.textContent = '▶ Play';
+        });
+      });
+    });
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+  </script>
+  <script class="autocontrol">
+   $(document).ready(function() {
+    // When the HTML document has finished loading,
+    // set the opacity of all <h1> elements with class "hword" to 1 (fully visible).
+    $("h1.hword").css("opacity", "1");
+
+    // Set the opacity of all <em> elements to 1 (fully visible).
+    $("em").css("opacity", "1");
+
+    // Add a click event handler to every <h1 class="hword"> element.
+    $("h1.hword").click(function() {
+
+    // Make the clicked <h1> fully visible.
+    $(this).css("opacity", "1");
+
+    // Starting from the clicked <h1>, find its parent elements
+    // until reaching elements with class "outer-container",
+    // then find <em> elements inside those containers
+    // and make them fully visible.
+    $(this)
+        .parents(".outer-container")
+        .find("em")
+        .css("opacity", "1");
+    });
+
+
+    // Find every <div class="example_sentences">.
+    // For each one, go to its parent element and hide
+    // any <div class="on-web"> inside that parent.
+    $("div.example_sentences")
+        .parent()
+        .find("div.on-web")
+        .hide();
+
+    // Similarly, hide any <div class="in-sentences">
+    // inside the parent of each example_sentences element.
+    $("div.example_sentences")
+        .parent()
+        .find("div.in-sentences")
+        .hide();
+
+    // Add a double-click event handler to every
+    // <div class="example_sentences"> element.
+    $("div.example_sentences").dblclick(function() {
+
+        // When the example sentences are double-clicked,
+        // toggle the visibility of <div class="on-web">
+        // inside the same parent element.
+        //
+        // "toggle()" means:
+        //   visible -> hidden
+        //   hidden  -> visible
+        $(this)
+            .parent()
+            .find("div.on-web")
+            .toggle();
+
+        // Also toggle the visibility of <div class="in-sentences">
+        // inside the same parent element.
+        $(this)
+            .parent()
+            .find("div.in-sentences")
+            .toggle();
+        });
+  </script>
+  <!-- End: Script Part -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+  <title>
+   Nunchuck Definition &amp; Meaning - Merriam-Webster
+  </title>
+  <link href="https://www.merriam-webster.com/dictionary/nunchuck" rel="canonical"/>
+  <link href="/opensearch/dictionary.xml" rel="search" title="Merriam-Webster Dictionary" type="application/opensearchdescription+xml"/>
+  <link href="/favicon.svg" rel="icon"/>
+  <link color="#305f7a" href="/safari-pinned-tab.svg" rel="mask-icon"/>
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="144x144"/>
+  <link href="/site.webmanifest" rel="manifest"/>
+  <link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions.1f89efcf6947f2d77ef5.css" media="screen" rel="stylesheet"/>
+  <link as="style" href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions-defer.ad5d4ce4a1782dba8842.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
+  <style type="text/css">
+   .abl {display:none!important;}
+  </style>
+ </head>
+ <body class="no-touch definitions-page dictionary-lookup">
+  <div class="main-container page-item">
+   <div class="left-content col-lg-7 col-xl-8" id="left-content">
+    <span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+    </span>
+    <div class="row entry-header">
+     <div class="col-12">
+      <h1 class="hword">
+       nunchuck
+      </h1>
+      <br/>
+     </div>
+    </div>
+    <div class="row entry-attr">
+     <div class="col">
+      <span class="fl">
+       <a class="important-blue-link" href="">
+        noun
+       </a>
+      </span>
+      <span class="prs">
+       <span class="first-slash">
+        \
+       </span>
+       <span class="pr">
+        ˈnən-ˌchək
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+      </span>
+      <div class="audio-card">
+       <button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+       <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/n/nuncha01.mp3">
+       </audio>
+      </div>
+     </div>
+    </div>
+    <div class="row headword-row">
+     <div class="col">
+      <span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+        <span class="vl">
+         or less commonly
+        </span>
+        <span class="va" id="nunchuk-anchor">
+         nunchuk
+        </span>
+       </span>
+      </span>
+     </div>
+    </div>
+    <div class="row headword-row">
+     <div class="col">
+      <span class="vg-ins">
+       <span class="il plural">
+        plural
+       </span>
+       <span class="if">
+        nunchucks
+       </span>
+       <span class="il also">
+        also
+       </span>
+       <span class="if">
+        nunchuks
+       </span>
+      </span>
+     </div>
+    </div>
+    <details>
+     <summary>
+      Click for Explanations
+     </summary>
+     <div class="DictionaryEntries">
+      <div id="dictionary-entry-1">
+       <div class="row vg-header">
+        <div class="col">
+         <h2 class="">
+          Definition of
+          <em>
+           nunchuck
+          </em>
+         </h2>
+         <p class="entryNumbers">
+         </p>
+        </div>
+       </div>
+       <div class="vg">
+        <div class="sb no-sn">
+         <span class="sb-0">
+          <div class="sense no-subnum">
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a weapon that consists of two sticks joined by a short length of cord, chain, or rawhide
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             <a class="mw_t_sx" href="/dictionary/nunchaku">
+              <span class="text-uppercase">
+               nunchaku
+              </span>
+             </a>
+            </span>
+            <span class="uns">
+             <span class="un">
+              <span class="mdash">
+               —
+              </span>
+              <span class="unText">
+               usually plural
+              </span>
+              <span class="vis">
+               <span class="vi">
+                <span class="ex-sent first-child t has-aq sents">
+                 For a time, he walked around with a set of
+                 <span class="mw_t_wi">
+                  nunchucks
+                 </span>
+                 in a holster strapped to his leg, like a six-shooter …
+                </span>
+                <span class="ex-sent aq has-aq sents">
+                 <span class="aq">
+                  <span class="auth">
+                   — Patrick Redden Keefe
+                  </span>
+                 </span>
+                </span>
+               </span>
+               <span class="vi">
+                <span class="ex-sent t has-aq sents">
+                 … surprised a pair of burglars, one of whom was carrying a knife and two
+                 <span class="mw_t_wi">
+                  nunchuks
+                 </span>
+                 .
+                </span>
+                <span class="ex-sent aq has-aq sents">
+                 <span class="aq">
+                  <span class="source">
+                   —
+                   <em class="mw_t_it">
+                    American Rifleman
+                   </em>
+                  </span>
+                 </span>
+                </span>
+               </span>
+              </span>
+             </span>
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+       </div>
+      </div>
+      <span id="anchor-seporator">
+      </span>
+      <div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+       <h2>
+        Examples of
+        <em>
+         nunchuck
+        </em>
+        in a Sentence
+       </h2>
+       <div class="on-web">
+        <span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+        <span class="ex-sent sents" data-example-id="7262407">
+         <span class="t has-aq">
+          Officers also found various weapons inside, including samurai swords,
+          <em>
+           nunchucks
+          </em>
+          and knives.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            Fox News
+           </em>
+           , 12 Apr. 2020
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="6010434">
+         <span class="t has-aq">
+          During a search of the house in Wimauma, investigators also seized pistol powder, knives, hatchets,
+          <em>
+           nunchucks
+          </em>
+          , BB pellet rifles and handguns and books and DVDs on murder, mass killing, bomb-making and domestic terrorism, Fox 13 Tampa reported.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           <em>
+            Fox News
+           </em>
+           , 5 Oct. 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="5828494">
+         <span class="t has-aq">
+          Most candles extinguished by
+          <em>
+           nunchucks
+          </em>
+          in one minute Xie Desheng snuffed out 52 open flames with nothing but ninja-like precision.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Scottie Andrew,
+           <em>
+            CNN
+           </em>
+           , 8 Sep. 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="5640069">
+         <span class="t has-aq">
+          Also declared unconstitutional have been New York State’s ban on
+          <em>
+           nunchucks
+          </em>
+          and Connecticut’s ban on transporting a police baton when moving it to a new home.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           David B. Kopel,
+           <em>
+            National Review
+           </em>
+           , 12 Sep. 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="5188821">
+         <span class="t has-aq">
+          Sarafina Bush's deliberately tacky costumes are a hoot, and the frequent dance numbers, many of them incorporating martial arts moves (and
+          <em>
+           nunchucks
+          </em>
+          as well!), are a lot of fun.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Frank Scheck,
+           <em>
+            The Hollywood Reporter
+           </em>
+           , 24 July 2019
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="3157039">
+         <span class="t has-aq">
+          That vision comes down to mixing together worlds, with nods to privilege (a silver spoon jutting out from a model’s mouth) or sometimes stereotypical odes to Asian culture (a denim and suede purse made out of
+          <em>
+           nunchucks
+          </em>
+          ).
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Liana Satenstein,
+           <em>
+            Vogue
+           </em>
+           , 12 June 2018
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="3016499">
+         <span class="t has-aq">
+          Officers seized high-capacity magazines, a pair of
+          <em>
+           nunchucks
+          </em>
+          and cocaine, according to Suttles, who said Selin Charmaholi’s brother, Sergey Charmaholi, 34, was allegedly responsible for supplying the drug.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Andy Nguyen,
+           <em>
+            latimes.com
+           </em>
+           , 31 May 2018
+          </span>
+         </span>
+        </span>
+        <span class="ex-sent sents" data-example-id="2733557">
+         <span class="t has-aq">
+          Garcia followed him outside with a pair of
+          <em>
+           nunchucks
+          </em>
+          , and the two started brawling, Baytown police said in a release.
+         </span>
+         <span class="aq has-aq">
+          —
+          <span class="aq">
+           Keri Blakinger,
+           <em>
+            Houston Chronicle
+           </em>
+           , 25 Feb. 2018
+          </span>
+         </span>
+        </span>
+       </div>
+      </div>
+      <div class="widget firstknown-list" id="first-known-anchor">
+       <h2>
+        First Known Use of
+        <em>
+         nunchuck
+        </em>
+       </h2>
+       <p class="ety-sl" data-entry-id="1">
+        1970, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+       </p>
+      </div>
+      <div class="widget etymology-list" id="etymology-anchor">
+       <h2>
+        History and Etymology for
+        <em>
+         nunchuck
+        </em>
+       </h2>
+       <p class="et">
+        probably representing Anglicization of
+        <a class="mw_t_et_link" href="/dictionary/nunchaku#etymology">
+         nunchaku
+        </a>
+        (with stress shift and deletion of final vowel)
+       </p>
+       <p class="et_snote">
+        <span class="note-txt">
+         Note:
+        </span>
+        Alternatively, final vowel loss may reflect devoicing of
+        <em class="mw_t_it">
+         -u
+        </em>
+        in Japanese.
+       </p>
+      </div>
+      <div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+      </div>
+      <div class="widget learn_more">
+      </div>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+     </div>
+    </details>
+   </div>
+  </div>
+ </body>
+ <div class="pagination-controls col-lg-7 col-xl-8 left-content">
+  <button id="prev-btn" type="button">
+   ◀ Previous
+  </button>
+  <span id="page-indicator">
+   Page 1 of 3
+  </span>
+  <button id="next-btn" type="button">
+   Next ▶
+  </button>
+ </div>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Marianne
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˌmarēˈan
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˌmer-
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˌmār-
+       </span>
+<span class="pun">
+        ;
+       </span>
+<span class="pr">
+        ˌmaarēˈaa(ə)n
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+<span class="vl">
+         or less commonly
+        </span>
+<span class="va" id="Marianna-anchor">
+         Marianna
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          -​ˈanə
+         </span>
+</span>
+<span class="last-slash">
+         \
+        </span>
+</span>
+</span>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="il plural">
+        plural
+       </span>
+<span class="ix">
+        -s
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Marianne
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the French Republic personified
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             the French people
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Marianne">
+              Online Etymolgy for Marianne
+              <!-- -->
+</h2>
+<section class="word__defination--2q7ZH">
+<p>
+               fem. proper name, from French, a variant of
+               <a class="crossreference notranslate" href="/word/Marian" title="Etymology, meaning and definition of Marian ">
+                Marian
+               </a>
+               ; sometimes Englished as
+               <span class="foreign notranslate">
+                Mary Anne
+               </span>
+               . It was the name of a republican secret society formed in France in 1851, when it became the designation of the female figure of "liberty" popular since the days of the Revolution; hence "personification of the French Republic" (1870).
+              </p>
+</section>
+<span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         Marianne
+        </em>
+</h2>
+<p class="et">
+        French, from
+        <em class="mw_t_it">
+         Marianne
+        </em>
+        , French republican society of the 1850s with the aim of overthrowing Napoleon III, from the feminine name
+        <em class="mw_t_it">
+         Marianne
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Phrygian
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈfri-j(ē-)ən
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/phrygi01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Phrygian
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a native or inhabitant of ancient
+             <a class="mw_t_a_link" href="/dictionary/Phrygia">
+              Phrygia
+             </a>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the extinct Indo-European language of the Phrygians
+             <span class="dx-jump">
+              — see
+              <a class="mw_t_dxt" href="/dictionary/Indo-European languages#table">
+               Indo-European Languages Table
+              </a>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Phrygian">
+              Online Etymolgy for Phrygian
+              <!-- -->
+</h2>
+<section class="word__defination--2q7ZH">
+<p>
+               late 15c., "native of
+               <span class="foreign notranslate">
+                Phrygia
+               </span>
+               ," region in ancient Asia Minor. As an adjective, "of, originating in, or relating to Phrygia," by 1570s. The
+               <span class="foreign notranslate">
+<strong>
+                 Phrygian mode
+                </strong>
+</span>
+               in ancient Greek music theory was held to be "of a warlike character." The
+               <span class="foreign notranslate">
+<strong>
+                 Phrygian cap
+                </strong>
+</span>
+               (1796) was the type adopted by freed slaves in Roman times, and thus it was subsequently identified as the cap of Liberty.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:late%2015c.">
+               late 15c.
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         Phrygian
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         Phrygian
+        </span>
+<span class="fl">
+         adjective
+        </span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         Phrygian
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        15th century, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Cassandra
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        kə-ˈsan-drə
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -ˈsän-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/cassan02.mp3">
+</audio>
+</div>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/cassan01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Cassandra
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a daughter of Priam endowed with the gift of prophecy but fated never to be believed
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             one that predicts misfortune or disaster
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Cassandra">
+              Online Etymolgy for Cassandra
+              <!-- -->
+</h2>
+<section class="word__defination--2q7ZH">
+<p>
+               fem. proper name, Latinized form of Greek
+               <span class="foreign notranslate">
+                Kasandra
+               </span>
+               ,
+               <span class="foreign notranslate">
+                Kassandra
+               </span>
+               , name of the daughter of Priam and Hecuba of Troy, seduced by Apollo, who gave her the gift of prophecy, but when she betrayed him he amended it so that, though she spoke truth, none would believe her. Used figuratively since 1660s.
+              </p>
+<p>
+               The name is of uncertain origin, though the second element looks like a fem. form of Greek
+               <span class="foreign notranslate">
+                andros
+               </span>
+               "of man, male human being." Watkins suggests PIE
+               <span class="foreign notranslate">
+                *(s)kand-
+               </span>
+               "to shine" as its source. The name also has been connected to
+               <span class="foreign notranslate">
+                kekasmai
+               </span>
+               "to surpass, excel," and Beekes suggests a source in PIE
+               <span class="foreign notranslate">
+                *(s)kend-
+               </span>
+               "raise."
+              </p>
+</section>
+<span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms &amp; Antonyms for
+        <em>
+         Cassandra
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/Chicken%20Little">
+          Chicken Little
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/doomsayer">
+          doomsayer
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/doomsdayer">
+          doomsdayer
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/doomster">
+          doomster
+         </a>
+</li>
+</ul>
+<p class="function-label">
+        Antonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/optimist">
+          optimist
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/Pollyanna">
+          Pollyanna
+         </a>
+</li>
+</ul>
+</div>
+<div class="widget little_gems little-gems-module-anchor-1" id="note-1-anchor">
+<h2>
+        Did you know?
+       </h2>
+<p>
+        The story of Cassandra comes from Greek mythology and is both tragic and ironic, as such myths tend to be. Cassandra was the daughter of Priam, the king of Troy. She caught the eye of the god Apollo, who was accustomed to getting what he wanted. He was amazed and displeased when she refused his romantic advances, and he became vengeful. He cursed Cassandra with a gift of prophecy with an especially cruel twist: he guaranteed that while she would always be right, no one would ever believe her predictions. Cassandra foretold the fall of Troy and other disastrous happenings, though she was ignored. Now, the label
+        <em>
+         Cassandra
+        </em>
+        is typically reserved for those who claim to see impending doom.
+       </p>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         Cassandra
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         more than one
+         <em class="mw_t_it">
+          Cassandra
+         </em>
+         on Wall Street had warned that the market was overdue for a major correction
+        </span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         Cassandra
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1542, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         Cassandra
+        </em>
+</h2>
+<p class="et">
+        Latin, from Greek
+        <em class="mw_t_it">
+         Kassandra
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="b-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Tertullian
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+       biographical name
+      </span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        (ˌ)tər-ˈtəl-yən
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/bix/bixter08.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Tertullian
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<em class="mw_t_it">
+              circa
+             </em>
+<span class="mw_t_sc">
+              a.d.
+             </span>
+             155(or 160)–after 220
+             <em class="mw_t_it">
+              Quintus Septimius Florens Tertullianus
+             </em>
+             church father
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       tryptophan
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈtrip-tə-ˌfan
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/trypto01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+<span class="vl">
+         or less commonly
+        </span>
+<span class="va" id="tryptophane-anchor">
+         tryptophane
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˈtrip-​tə-​ˌfān
+         </span>
+<a class="play-pron" data-dir="t" data-file="trypto02" data-lang="en_us" data-title="How to pronounce tryptophan (audio)" href="/dictionary/tryptophan?pronunciation&amp;lang=en_us&amp;dir=t&amp;file=trypto02" title="How to pronounce tryptophan (audio)">
+<img alt="How to pronounce tryptophan (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+</span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           tryptophan
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a crystalline essential amino acid C
+             <sub>
+              11
+             </sub>
+             H
+             <sub>
+              12
+             </sub>
+             N
+             <sub>
+              2
+             </sub>
+             O
+             <sub>
+              2
+             </sub>
+             that is widely distributed in proteins
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of tryptophan">
+              Online Etymolgy for tryptophan
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               also
+               <span class="foreign notranslate">
+                tryptophane
+               </span>
+               , complex amino acid, 1890, coined in German (1876) from
+               <span class="foreign notranslate">
+                trypto-
+               </span>
+               , taken as a combining form of
+               <a class="crossreference notranslate" href="/word/tryptic" title="Etymology, meaning and definition of tryptic ">
+                tryptic
+               </a>
+               "by trypsin" (see
+               <a class="crossreference notranslate" href="/word/trypsin" title="Etymology, meaning and definition of trypsin ">
+                trypsin
+               </a>
+               ) + Greek
+               <span class="foreign notranslate">
+                phainein
+               </span>
+               "bring to light, cause to appear, show" (from PIE root
+               <a class="crossreference notranslate" href="/word/*bha-#etymonline_v_52589" title="Etymology, meaning and definition of *bha- ">
+                *bha-
+               </a>
+               (1) "to shine").
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1890">
+               1890
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         tryptophan
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11500653">
+<span class="t has-aq">
+          The 152
+          <em>
+           tryptophan
+          </em>
+          is substituted for leucine in the California variants.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           William A. Haseltine,
+           <em>
+            Forbes
+           </em>
+           , 20 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11287325">
+<span class="t has-aq">
+          Without the ability to measure fecal coliform in real time, the Chicago River probes measure
+          <em>
+           tryptophan
+          </em>
+          -like fluorescence; researchers say readings spike after rain events or sewage dumps, similarly to fecal coliform levels.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Morgan Greene,
+           <em>
+            chicagotribune.com
+           </em>
+           , 2 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10871846">
+<span class="t has-aq">
+          Carbohydrates in berries can help to amplify serotonin production in the brain, while yogurt is a source of sleep-promoting
+          <em>
+           tryptophan
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lisa Drayer,
+           <em>
+            CNN
+           </em>
+           , 20 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10764622">
+<span class="t has-aq">
+          Carbohydrates in berries can help to amplify serotonin production in the brain, while yogurt is a source of sleep-promoting
+          <em>
+           tryptophan
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lisa Drayer,
+           <em>
+            CNN
+           </em>
+           , 20 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10654530">
+<span class="t has-aq">
+          Carbohydrates in berries can help to amplify serotonin production in the brain, while yogurt is a source of sleep-promoting
+          <em>
+           tryptophan
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lisa Drayer,
+           <em>
+            CNN
+           </em>
+           , 20 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10544780">
+<span class="t has-aq">
+          Carbohydrates in berries can help to amplify serotonin production in the brain, while yogurt is a source of sleep-promoting
+          <em>
+           tryptophan
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lisa Drayer,
+           <em>
+            CNN
+           </em>
+           , 20 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10435648">
+<span class="t has-aq">
+          Carbohydrates in berries can help to amplify serotonin production in the brain, while yogurt is a source of sleep-promoting
+          <em>
+           tryptophan
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lisa Drayer,
+           <em>
+            CNN
+           </em>
+           , 20 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10325407">
+<span class="t has-aq">
+          Carbohydrates in berries can help to amplify serotonin production in the brain, while yogurt is a source of sleep-promoting
+          <em>
+           tryptophan
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lisa Drayer,
+           <em>
+            CNN
+           </em>
+           , 20 Apr. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         tryptophan
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1890, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         tryptophan
+        </em>
+</h2>
+<p class="et">
+        borrowed from German
+        <em class="mw_t_it">
+         Tryptophan,
+        </em>
+        from
+        <em class="mw_t_it">
+         trypt
+        </em>
+        isch
+        <a class="mw_t_et_link" href="/dictionary/tryptic#etymology">
+         tryptic
+        </a>
+        +
+        <em class="mw_t_it">
+         -o-
+        </em>
+<a class="mw_t_et_link" href="/dictionary/-o-#etymology">
+         -o-
+        </a>
+        +
+        <em class="mw_t_it">
+         -phan
+        </em>
+<a class="mw_t_et_link" href="/dictionary/-phane#etymology">
+         -phane
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       cortisol
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈkȯr-tə-ˌsȯl
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -ˌzȯl
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -ˌsōl
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -ˌzōl
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/cortis01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           cortisol
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a glucocorticoid C
+             <sub>
+              21
+             </sub>
+             H
+             <sub>
+              30
+             </sub>
+             O
+             <sub>
+              5
+             </sub>
+             produced by the adrenal
+             <a class="mw_t_a_link" href="/dictionary/cortex">
+              cortex
+             </a>
+             upon stimulation by ACTH that mediates various metabolic processes (such as gluconeogenesis), has anti-inflammatory and immunosuppressive properties, and whose levels in the blood may become elevated in response to physical or psychological stress
+            </span>
+<p class="ca">
+<span class="mdash">
+              —
+             </span>
+<span class="intro">
+              called also
+             </span>
+<span class="cat">
+              hydrocortisone
+             </span>
+</p>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of cortisol">
+              Online Etymolgy for cortisol
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "hydrocortisone," 1953; see from
+               <a class="crossreference notranslate" href="/word/cortisone" title="Etymology, meaning and definition of cortisone ">
+                cortisone
+               </a>
+               +
+               <a class="crossreference notranslate" href="/word/-ol" title="Etymology, meaning and definition of -ol ">
+                -ol
+               </a>
+               . Chosen as a shorter and clearer alternative to
+               <span class="foreign notranslate">
+                hydrocortisone
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1953">
+               1953
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         cortisol
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11917995">
+<span class="t has-aq">
+          With better rest, your
+          <em>
+           cortisol
+          </em>
+          levels can be better managed and less reactive to every daily encounter.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jodie Cook,
+           <em>
+            Forbes
+           </em>
+           , 8 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11709646">
+<span class="t has-aq">
+          Dark chocolate is packed with flavonoids—plant compounds with a whole host of amazing health benefits, including the ability to lower
+          <em>
+           cortisol
+          </em>
+          release.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Wellory,
+           <em>
+            Forbes
+           </em>
+           , 28 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11709641">
+<span class="t has-aq">
+          Doubling levels of
+          <em>
+           cortisol
+          </em>
+          alone -- but not norepinephrine, epinephrine or dopamine -- was associated with a 90% higher risk of having a cardiovascular event, the study found.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Sandee Lamotte,
+           <em>
+            CNN
+           </em>
+           , 13 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11709642">
+<span class="t has-aq">
+          The sight sent a jolt of
+          <em>
+           cortisol
+          </em>
+          through his body and an urgent shout out of his lungs.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Hermione Hoby,
+           <em>
+            Harper's Magazine
+           </em>
+           , 22 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11709643">
+<span class="t has-aq">
+          Frey hypothesized that these proteins were not merely a byproduct of tears, but that tears allow the body to reduce the levels of
+          <em>
+           cortisol
+          </em>
+          in the brain.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            The Salt Lake Tribune
+           </em>
+           , 17 May 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11709644">
+<span class="t has-aq">
+          Plants can improve your state of mind in a few ways, says Knuth, but the biggest is by decreasing your level of
+          <em>
+           cortisol
+          </em>
+          , the stress hormone in our body that is expressed in saliva.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Angel Madison,
+           <em>
+            House Beautiful
+           </em>
+           , 9 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11709645">
+<span class="t has-aq">
+          Houseplants provide a calming connection to the natural world, and caring for them is a mindful, meditative practice that prompts levels of
+          <em>
+           cortisol
+          </em>
+          —the bad guy hormone implicated in everything from weight gain to premature aging to acne—to plummet.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           April Long,
+           <em>
+            Town &amp; Country
+           </em>
+           , 31 Mar. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11602013">
+<span class="t has-aq">
+          As
+          <em>
+           cortisol
+          </em>
+          levels elevate, the body may not want to put as much energy into feeling desire when there are other more pressing needs at hand.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Fiorella Valdesolo,
+           <em>
+            Vogue
+           </em>
+           , 7 Oct. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         cortisol
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1951, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         cortisol
+        </em>
+</h2>
+<p class="et">
+<em class="mw_t_it">
+         cortis
+        </em>
+        one +
+        <a class="mw_t_et_link" href="/dictionary/-ol#etymology">
+         -ol
+         <span class="text-lowercase">
+          entry
+         </span>
+         1
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       adrenaline
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ə-ˈdre-nə-lən
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/adrena04.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           adrenaline
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/epinephrine">
+<span class="text-uppercase">
+               epinephrine
+              </span>
+</a>
+</span>
+<p class="snote">
+<span class="note-txt">
+              Note:
+             </span>
+<em class="mw_t_it">
+              Adrenaline
+             </em>
+             is used in both technical and nontechnical contexts. It is commonly used in describing the physiological symptoms (such as increased heart rate and respiration) that occur as part of the body's
+             <a class="mw_t_d_link" href="/dictionary/fight-or-flight">
+              fight-or-flight
+             </a>
+             response to stress, as when someone is in a dangerous, frightening, or highly competitive situation, as well as the feelings of heightened energy, excitement, strength, and alertness associated with those symptoms. In figurative use, it suggests a drug that provides something with a jolt of useful energy and stimulation.
+            </p>
+<span class="ex-sent first-child t no-aq sents">
+             He felt a rush of
+             <span class="mw_t_wi">
+              adrenaline
+             </span>
+             as he parachuted from the airplane.
+            </span>
+<span class="ex-sent t has-aq sents">
+             The fans were jubilant, raucous, their
+             <span class="mw_t_wi">
+              adrenaline
+             </span>
+             running high.
+            </span>
+<span class="ex-sent aq has-aq sents">
+<span class="aq">
+<span class="auth">
+               — W. P. Kinsella
+              </span>
+</span>
+</span>
+<span class="ex-sent t has-aq sents">
+             My reputation was as a single-day racer; show me the start line and I would win on
+             <span class="mw_t_wi">
+              adrenaline
+             </span>
+             and anger, chopping off my competitors one by one.
+            </span>
+<span class="ex-sent aq has-aq sents">
+<span class="aq">
+<span class="auth">
+               — Lance Armstrong
+              </span>
+</span>
+</span>
+<span class="ex-sent t has-aq sents">
+             London's summer antiques scene has been given a massive injection of
+             <span class="mw_t_wi">
+              adrenaline
+             </span>
+             .
+            </span>
+<span class="ex-sent aq has-aq sents">
+<span class="aq">
+<span class="source">
+               —
+               <em class="mw_t_it">
+                Town and Country
+               </em>
+</span>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of adrenaline">
+              adrenaline
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               also
+               <span class="foreign notranslate">
+                Adrenalin
+               </span>
+               (trademark name), coined 1901 by Japanese chemist Jokichi Takamine (1853-1922), who discovered it, from Modern Latin
+               <span class="foreign notranslate">
+                adrenal
+               </span>
+               (see
+               <a class="crossreference notranslate" href="/word/adrenal" title="Etymology, meaning and definition of adrenal ">
+                adrenal
+               </a>
+               ) + chemical suffix
+               <a class="crossreference notranslate" href="/word/-ine#etymonline_v_42197" title="Etymology, meaning and definition of -ine ">
+                -ine
+               </a>
+               (2).
+               <span class="foreign notranslate">
+                Adrenaline rush
+               </span>
+               was in use c. 1970.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1901">
+               1901
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         adrenaline
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11934194">
+<span class="t has-aq">
+          Red Bull’s story is about a vibrant life full of
+          <em>
+           adrenaline
+          </em>
+          to enjoy every moment.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Alex Kreger,
+           <em>
+            Forbes
+           </em>
+           , 12 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934195">
+<span class="t has-aq">
+          Simply freeing up the infrastructure measure for final congressional approval was like a burst of
+          <em>
+           adrenaline
+          </em>
+          for Democrats.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            BostonGlobe.com
+           </em>
+           , 6 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934196">
+<span class="t has-aq">
+          Simply freeing up the infrastructure measure for final congressional approval was a like a burst of
+          <em>
+           adrenaline
+          </em>
+          for Democrats.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Alan Fram,
+           <em>
+            Fortune
+           </em>
+           , 6 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934197">
+<span class="t has-aq">
+          Simply freeing up the infrastructure measure for final congressional approval was a like a burst of
+          <em>
+           adrenaline
+          </em>
+          for Democrats.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Alan Fram,
+           <em>
+            Anchorage Daily News
+           </em>
+           , 6 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934198">
+<span class="t has-aq">
+          Cleveland time, Foo Fighters injected a late-night jolt of
+          <em>
+           adrenaline
+          </em>
+          into the 2021 Rock &amp; Roll Hall of Fame induction ceremony, taking the stage for a brisk, no-frills three-song performance.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Annie Zaleski,
+           <em>
+            Rolling Stone
+           </em>
+           , 31 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934199">
+<span class="t has-aq">
+          Appearing alongside Terry McAuliffe, the Democratic nominee for governor, and a host of other candidates and officials, Obama provided a jolt of
+          <em>
+           adrenaline
+          </em>
+          for a party concerned with mustering voter turnout as the Nov. 2 election draws near.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 23 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934200">
+<span class="t has-aq">
+          The film is based on the original story and screenplay for the 2005 Danish thriller Ambulance by Laurits Munch-Petersen and Lars Andreas Pedersen, but in the hands of Bay this concept gets a massive shot of
+          <em>
+           adrenaline
+          </em>
+          straight to the heart.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Nick Romano,
+           <em>
+            EW.com
+           </em>
+           , 21 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11934201">
+<span class="t has-aq">
+          One was the extra shot of
+          <em>
+           adrenaline
+          </em>
+          that goes with competing with people watching.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jim Owczarski,
+           <em>
+            Milwaukee Journal Sentinel
+           </em>
+           , 4 Oct. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         adrenaline
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1890, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         adrenaline
+        </em>
+</h2>
+<p class="et">
+<a class="mw_t_et_link" href="/dictionary/adrenal#etymology">
+         adrenal
+         <span class="text-lowercase">
+          entry
+         </span>
+         2
+        </a>
+        +
+        <a class="mw_t_et_link" href="/dictionary/-ine#etymology">
+         -ine
+         <span class="text-lowercase">
+          entry
+         </span>
+         2
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       ternary
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        adjective
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈtər-nə-rē
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/ternar01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           ternary
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-1 a">
+<span class="num">
+             1
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             of, relating to, or proceeding by threes
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             having three elements, parts, or divisions
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-2">
+<div class="sense has-sn">
+<span class="sn sense-c">
+<span class="letter">
+             c
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             arranged in threes
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+<span class="mw_t_sp">
+<span class="mw_t_wi">
+               ternary
+              </span>
+              petals
+             </span>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             using three as the base
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             a
+             <span class="mw_t_wi">
+              ternary
+             </span>
+             logarithm
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-3 a">
+<span class="num">
+             3
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             being or consisting of an alloy of three elements
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             of, relating to, or containing three different elements, atoms, radicals, or groups
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             sulfuric acid is a
+             <span class="mw_t_wi">
+              ternary
+             </span>
+             acid
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-4">
+<span class="num">
+             4
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             third in order or rank
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of ternary">
+              Online Etymolgy for ternary
+              <!-- -->
+<!-- -->
+              (adj.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "threefold," early 15c., from Late Latin
+               <span class="foreign notranslate">
+                ternarius
+               </span>
+               "consisting of three," from
+               <span class="foreign notranslate">
+                terni
+               </span>
+               "three by three," from
+               <span class="foreign notranslate">
+                ter
+               </span>
+               "thrice," which is related to
+               <span class="foreign notranslate">
+                tres
+               </span>
+               "three" (see
+               <a class="crossreference notranslate" href="/word/three" title="Etymology, meaning and definition of three ">
+                three
+               </a>
+               ).
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:early%2015c.">
+               early 15c.
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         ternary
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="6286218">
+<span class="t has-aq">
+          This middle movement follows an A-B-A
+          <em>
+           ternary
+          </em>
+          structure where the opening material is a lyrical adagio and the contrasting middle section presents more rhythmic, scherzo-like music.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jessica Rudman,
+           <em>
+            courant.com
+           </em>
+           , 7 Dec. 2019
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="5657652">
+<span class="t has-aq">
+          Nevertheless, especially in gnaoua music, the repetitive rhythm structure based on binary or
+          <em>
+           ternary
+          </em>
+          patterns is quite hypnotic and leads to a transcendental state that can totally be linked to what's happening in an electronic music club.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Katie Bain,
+           <em>
+            Billboard
+           </em>
+           , 12 Sep. 2019
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         ternary
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        15th century, in the meaning defined at
+        <a href="#h1">
+         sense 1a
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         ternary
+        </em>
+</h2>
+<p class="et">
+        Middle English, from Latin
+        <em class="mw_t_it">
+         ternarius
+        </em>
+        , from
+        <em class="mw_t_it">
+         terni
+        </em>
+        three each; akin to Latin
+        <em class="mw_t_it">
+         tres
+        </em>
+        three  — more at
+        <a class="mw_t_mat" href="/dictionary/three#etymology">
+         three
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       rink
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈriŋk
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rink0001.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           rink
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-1 a">
+<span class="num">
+             1
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a smooth extent of ice marked off for curling or ice hockey
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt hasSdSense">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a surface of ice for ice-skating
+            </span>
+</span>
+<span class="sdsense">
+<span class="sd">
+             also
+            </span>
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a building containing such a rink
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-2">
+<div class="sense has-sn">
+<span class="sn sense-c">
+<span class="letter">
+             c
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             an enclosure for roller-skating
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             an alley for lawn bowling
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-3">
+<span class="num">
+             3
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a team in bowls or curling
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of rink">
+              Online Etymolgy for rink
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               late 14c., "measured ground for a combat, joust, race., etc.," in a Scottish source, and according to OED "Until the latter part of the 19thy cent. only in Sc. use;" probably from Old French
+               <span class="foreign notranslate">
+                renc
+               </span>
+               ,
+               <span class="foreign notranslate">
+                reng
+               </span>
+               "row, line," from Frankish or another Germanic source, from Proto-Germanic
+               <span class="foreign notranslate">
+                *hringaz
+               </span>
+               "something curved, circle" (from PIE root
+               <a class="crossreference notranslate" href="/word/*sker-#etymonline_v_52738" title="Etymology, meaning and definition of *sker- ">
+                *sker-
+               </a>
+               (2) "to turn, bend"). But probably much confused in meaning with
+               <a class="crossreference notranslate" href="/word/ring#etymonline_v_15081" title="Etymology, meaning and definition of ring ">
+                ring
+               </a>
+               (n.1), also used for "area marked out for a sporting contest."
+              </p>
+<p>
+               By 1787 (Burns) as "a sheet of ice measured off for curling;" extended to smooth wooden floors for roller-skating by 1875, to ice surfaces measured for ice hockey by 1896. By 1895 as "building containing a skating rink." A modern Latinate word for an ice-skating rink is
+               <span class="foreign notranslate">
+                glaciarium
+               </span>
+               (1876).
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:late%2014c.">
+               late 14c.
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         rink
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         The hockey team is practicing at the
+         <em class="mw_t_it">
+          rink
+         </em>
+         .
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11931839">
+<span class="t has-aq">
+          Last year, my husband made an ice-skating
+          <em>
+           rink
+          </em>
+          in the backyard by banking the snow in a large circle and filling it with water from our hose.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 15 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11931840">
+<span class="t has-aq">
+          During the winter months, the Gallivan Center’s outdoor ice-skating
+          <em>
+           rink
+          </em>
+          is converted into a frozen oasis encased by towering buildings, festive glowing lights, and the urban winter landscape of Salt Lake City.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            The Salt Lake Tribune
+           </em>
+           , 11 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11931841">
+<span class="t has-aq">
+          After a fight at a skating
+          <em>
+           rink
+          </em>
+          in a village near Akron, a police officer demanded a 13-year-old girl’s help finding a relative suspected of being involved in the scuffle, according to her family’s lawsuit.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            USA Today
+           </em>
+           , 2 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11931835">
+<span class="t has-aq">
+          Due to space constraints, the Donna Summer disco party will not feature its signature roller-skating
+          <em>
+           rink
+          </em>
+          , the city of Boston announced in a statement Wednesday.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            BostonGlobe.com
+           </em>
+           , 23 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11931836">
+<span class="t has-aq">
+          His
+          <em>
+           rink
+          </em>
+          , the Ice Palace, is now home to the Don't Bothers, a team started by single mom Alex Morrow (Lauren Graham), after the Ducks cut her son over his hockey skills.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Erin Jensen,
+           <em>
+            USA TODAY
+           </em>
+           , 30 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11931837">
+<span class="t has-aq">
+          No offense to their 10,000-seat
+          <em>
+           rink
+          </em>
+          with the Olympic-sized ice sheet, but the Gophers have found life away from Dinkytown to their liking in this sports year turned topsy-turvy because of the coronavirus pandemic.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Randy Johnson,
+           <em>
+            Star Tribune
+           </em>
+           , 13 Mar. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11931838">
+<span class="t has-aq">
+          But only months after portions of the complex began opening, starting with its ice-skating
+          <em>
+           rink
+          </em>
+          and a Nickelodeon amusement park, the pandemic hit.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Michael Corkery,
+           <em>
+            New York Times
+           </em>
+           , 26 Nov. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11823768">
+<span class="t has-aq">
+          The season will commence Nov. 24 with the opening of the Winter Forest, a 5,000-square-foot ice
+          <em>
+           rink
+          </em>
+          , and the annual Lighting at the Lake, when Santa illuminates hundreds of thousands of lights around the resort.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Jennifer Kester,
+           <em>
+            Forbes
+           </em>
+           , 4 Nov. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         rink
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1787, in the meaning defined at
+        <a href="#h1">
+         sense 1a
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         rink
+        </em>
+</h2>
+<p class="et">
+        Middle English (Scots)
+        <em class="mw_t_it">
+         rinc
+        </em>
+        area in which a contest takes place, from Anglo-French
+        <em class="mw_t_it">
+         renc
+        </em>
+        row, lists  — more at
+        <a class="mw_t_mat" href="/dictionary/rank#etymology">
+         rank
+         <span class="text-lowercase">
+          entry
+         </span>
+         1
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body></html>
