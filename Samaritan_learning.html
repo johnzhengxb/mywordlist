@@ -1,0 +1,5894 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Start: Style Part -->
+  <style class="Pagination">
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    div.pagination-controls {
+        width: 100% !important;
+        font-size: 1 rem !important;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        padding-right: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1000; /* Keeps it above other elements */
+     }
+
+   #prev-btn, #next-btn {
+        width: 25%;
+        height: 60px;
+        border-radius: 8px;
+        background-color: darkgreen;
+   }
+
+   #page-indicator {
+        display: inline-block;
+        padding-left: 10%;
+        text-align:center;
+        margin-left: auto;
+        margin-right: auto;
+   }
+
+   #next-btn {
+        margin-left: auto; /* 下一页按钮靠右对齐*/
+   }
+
+   .page-item {
+        display: none;  /* Hide all items by default */
+    }
+
+   .page-item.active {
+        display: block; /* Only show items belonging to the active page */
+        height: 100% !important;
+    }
+  </style>
+  <style class="Heading">
+   h1 {
+          width: 100% !important;
+          max-height: fit-content  !important;
+          padding: 2rem !important;
+          margin-bottom: 12px !important;
+          margin-top: 36px !important;
+          font-size: 3rem  !important;
+          background-color: darkgreen;
+          border-radius: 8px;
+        }
+  </style>
+  <style class="collapse-Expand">
+   details {
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            padding: 10px !important;
+            background: #012344;
+            margin-top:24px !important;
+        }
+
+        summary {
+            font-size:1rem !important;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            margin-left:12px !important;
+        }
+  </style>
+  <style class="audio-player">
+   .audio-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    margin-bottom: 12px;
+                    margin-top: 12px;
+                    padding: 1px 1px;
+                    border-radius: 12px;
+                    max-width: 100%;
+            }
+
+        .custom-play-btn {
+                height: 60px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+  </style>
+  <!-- End Style Part -->
+  <!-- Start Script Part -->
+  <script class="Pagination">
+   document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('.page-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 1;
+        const itemsPerPage = 1; // Change this to how many items you want per page
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        function showPage(page) {
+
+        if(page>totalPages){page=1};// 循环
+        currentPage = page;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        items.forEach((item, index) => {
+        if (index >= start && index < end) {
+                item.classList.add('active');
+                item.getElementsByTagName("audio")[0].play();
+        } else {
+                item.classList.remove('active');
+        }
+        });
+
+        // Update indicator and button states
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        // nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+        showPage(currentPage + 1);
+        });
+
+        // Initialize first page view
+        showPage(1);
+
+        });
+  </script>
+  <script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+  <script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.textContent = '⏸ Pause';
+          } else {
+            audio.pause();
+            btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          btn.textContent = '▶ Play';
+        });
+      });
+    });
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+  </script>
+  <script class="autocontrol">
+   $(document).ready(function() {
+    // When the HTML document has finished loading,
+    // set the opacity of all <h1> elements with class "hword" to 1 (fully visible).
+    $("h1.hword").css("opacity", "1");
+
+    // Set the opacity of all <em> elements to 1 (fully visible).
+    $("em").css("opacity", "1");
+
+    // Add a click event handler to every <h1 class="hword"> element.
+    $("h1.hword").click(function() {
+
+    // Make the clicked <h1> fully visible.
+    $(this).css("opacity", "1");
+
+    // Starting from the clicked <h1>, find its parent elements
+    // until reaching elements with class "outer-container",
+    // then find <em> elements inside those containers
+    // and make them fully visible.
+    $(this)
+        .parents(".outer-container")
+        .find("em")
+        .css("opacity", "1");
+    });
+
+
+    // Find every <div class="example_sentences">.
+    // For each one, go to its parent element and hide
+    // any <div class="on-web"> inside that parent.
+    $("div.example_sentences")
+        .parent()
+        .find("div.on-web")
+        .hide();
+
+    // Similarly, hide any <div class="in-sentences">
+    // inside the parent of each example_sentences element.
+    $("div.example_sentences")
+        .parent()
+        .find("div.in-sentences")
+        .hide();
+
+    // Add a double-click event handler to every
+    // <div class="example_sentences"> element.
+    $("div.example_sentences").dblclick(function() {
+
+        // When the example sentences are double-clicked,
+        // toggle the visibility of <div class="on-web">
+        // inside the same parent element.
+        //
+        // "toggle()" means:
+        //   visible -> hidden
+        //   hidden  -> visible
+        $(this)
+            .parent()
+            .find("div.on-web")
+            .toggle();
+
+        // Also toggle the visibility of <div class="in-sentences">
+        // inside the same parent element.
+        $(this)
+            .parent()
+            .find("div.in-sentences")
+            .toggle();
+        });
+  </script>
+  <!-- End: Script Part -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+  <title>
+   Samaritan Definition &amp; Meaning - Merriam-Webster
+  </title>
+  <link href="https://www.merriam-webster.com/dictionary/Samaritan" rel="canonical"/>
+  <link href="/opensearch/dictionary.xml" rel="search" title="Merriam-Webster Dictionary" type="application/opensearchdescription+xml"/>
+  <link href="/favicon.svg" rel="icon"/>
+  <link color="#305f7a" href="/safari-pinned-tab.svg" rel="mask-icon"/>
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="144x144"/>
+  <link href="/site.webmanifest" rel="manifest"/>
+  <link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions.1f89efcf6947f2d77ef5.css" media="screen" rel="stylesheet"/>
+  <link as="style" href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions-defer.ad5d4ce4a1782dba8842.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
+  <style type="text/css">
+   .abl {display:none!important;}
+  </style>
+ </head>
+ <body class="no-touch definitions-page dictionary-lookup">
+  <div class="main-container page-item">
+   <div class="left-content col-lg-7 col-xl-8" id="left-content">
+    <span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+    </span>
+    <div class="row entry-header">
+     <div class="col-12">
+      <h1 class="hword">
+       Samaritan
+      </h1>
+      <br/>
+     </div>
+    </div>
+    <div class="row entry-attr">
+     <div class="col">
+      <span class="fl">
+       <a class="important-blue-link" href="">
+        noun
+       </a>
+      </span>
+      <span class="prs">
+       <span class="first-slash">
+        \
+       </span>
+       <span class="pr">
+        sə-ˈmer-ə-tən
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+      </span>
+      <div class="audio-card">
+       <button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+       <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/samari01.mp3">
+       </audio>
+      </div>
+     </div>
+    </div>
+    <details>
+     <summary>
+      Click for Explanations
+     </summary>
+     <div class="DictionaryEntries">
+      <div id="dictionary-entry-1">
+       <div class="row vg-header">
+        <div class="col">
+         <h2 class="">
+          Definition of
+          <em>
+           Samaritan
+          </em>
+         </h2>
+         <p class="entryNumbers">
+         </p>
+        </div>
+       </div>
+       <div class="vg">
+        <div class="sb has-num">
+         <span class="sb-0">
+          <div class="sense has-num-only">
+           <span class="sn sense-1">
+            <span class="num">
+             1
+            </span>
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a native or inhabitant of
+             <a class="mw_t_a_link" href="/dictionary/Samaria">
+              Samaria
+             </a>
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+        <div class="sb has-num">
+         <span class="sb-0">
+          <div class="sense has-num-only">
+           <span class="sn sense-2">
+            <span class="num">
+             2
+            </span>
+           </span>
+           <span class="et">
+            [from the parable of the good Samaritan in Luke 10:30–37]
+           </span>
+           <span class="dt">
+            <span class="dtText">
+             <strong class="mw_t_bc">
+              :
+             </strong>
+             a person who is generous in helping those in distress
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+       </div>
+      </div>
+      <body>
+       <div class="main main--10rAd" data-role="content-main">
+        <div class="ant-row-flex ant-row-flex-space-around">
+         <div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+          <div class="word--C9UPa">
+           <div>
+            <div class="" style="position:relative">
+             <h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Samaritan">
+              Online Etymolgy for Samaritan
+              <!-- -->
+              <!-- -->
+              (n.)
+             </h2>
+             <section class="word__defination--2q7ZH">
+              <p>
+               Old English, "native or inhabitant of Samaria," a district of ancient Palestine, from Late Latin
+               <span class="foreign notranslate">
+                Samaritanus
+               </span>
+               , from Greek
+               <span class="foreign notranslate">
+                Samareitēs
+               </span>
+               , from
+               <span class="foreign notranslate">
+                Samareia
+               </span>
+               (see
+               <a class="crossreference notranslate" href="/word/Samaria" title="Etymology, meaning and definition of Samaria ">
+                Samaria
+               </a>
+               ). A non-Hebrew race was settled in its cities by the king of Assyria after the removal of the Israelites from the country.
+              </p>
+              <blockquote>
+               Originally idolaters they soon began to worship Jehovah, but without abandoning their former gods. They afterward became monotheists, and observed the Mosaic law very strictly, but with peculiar variations. About 400 B. C. they built a temple on Mount Gerisim, which was destroyed 130 B. C. They began to decline toward the close of the fifth century after Christ. They still exist, bat are nearly extinct. [Century Dictionary, 1897]
+              </blockquote>
+              <p>
+               The figurative use for "charitable or benevolent person," with reference to the Biblical story of the
+               <span class="foreign notranslate">
+                <strong>
+                 good Samaritan
+                </strong>
+               </span>
+               in Luke x, is attested from 1630s. As an adjective by late 14c. Related:
+               <span class="foreign notranslate">
+                Samaritanism
+               </span>
+               .
+              </p>
+             </section>
+             <span>
+             </span>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </body>
+      <span id="anchor-seporator">
+      </span>
+      <div class="widget uros uro-module-anchor" id="other-words-anchor">
+       <h2>
+        Other Words from
+        <em>
+         Samaritan
+        </em>
+       </h2>
+       <div class="uro">
+        <span class="ure">
+         samaritan
+        </span>
+        <span class="fl">
+         adjective,
+        </span>
+        <span class="lb">
+         often capitalized
+        </span>
+       </div>
+      </div>
+      <div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+       <h2>
+        Examples of
+        <em>
+         Samaritan
+        </em>
+        in a Sentence
+       </h2>
+       <div class="in-sentences">
+        <span class="ex-sent first-child t no-aq sents">
+         A
+         <em class="mw_t_it">
+          Samaritan
+         </em>
+         called a tow truck for us.
+        </span>
+       </div>
+      </div>
+      <div class="widget firstknown-list" id="first-known-anchor">
+       <h2>
+        First Known Use of
+        <em>
+         Samaritan
+        </em>
+       </h2>
+       <p class="ety-sl" data-entry-id="1">
+        before the 12th century, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+       </p>
+      </div>
+      <div class="widget etymology-list" id="etymology-anchor">
+       <h2>
+        History and Etymology for
+        <em>
+         Samaritan
+        </em>
+       </h2>
+       <p class="et">
+        Middle English, from Old English, from Late Latin
+        <em class="mw_t_it">
+         samaritanus
+        </em>
+        , noun &amp; adjective, from Greek
+        <em class="mw_t_it">
+         samaritēs
+        </em>
+        inhabitant of Samaria, from
+        <em class="mw_t_it">
+         Samaria
+        </em>
+       </p>
+      </div>
+      <div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+      </div>
+      <div class="widget learn_more">
+      </div>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+     </div>
+    </details>
+   </div>
+  </div>
+ </body>
+ <div class="pagination-controls col-lg-7 col-xl-8 left-content">
+  <button id="prev-btn" type="button">
+   ◀ Previous
+  </button>
+  <span id="page-indicator">
+   Page 1 of 3
+  </span>
+  <button id="next-btn" type="button">
+   Next ▶
+  </button>
+ </div>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       knave
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈnāv
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/k/knave001.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           knave
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a tricky deceitful fellow
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/jack">
+<span class="text-uppercase">
+               jack
+              </span>
+<span class="text-lowercase">
+               sense 2a
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<span class="sen has-num-only">
+<span class="sn sense-3">
+<span class="num">
+             3
+            </span>
+</span>
+<span class="sl">
+            archaic
+           </span>
+</span>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-a">
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a boy servant
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-2">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a male servant
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-3">
+<div class="sense has-sn">
+<span class="sn sense-c">
+<span class="letter">
+             c
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a man of humble birth or position
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of knave">
+              Online Etymolgy for knave
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               late Old English
+               <span class="foreign notranslate">
+                cnafa
+               </span>
+               "boy, male child; male servant," from Proto-Germanic
+               <span class="foreign notranslate">
+                *knabon-
+               </span>
+               (source also of Old High German
+               <span class="foreign notranslate">
+                knabo
+               </span>
+               "boy, youth, servant," German
+               <span class="foreign notranslate">
+                knabe
+               </span>
+               "boy, lad"); it is also probably related to Old English
+               <span class="foreign notranslate">
+                cnapa
+               </span>
+               "boy, youth, servant," Old Norse
+               <span class="foreign notranslate">
+                knapi
+               </span>
+               "servant boy," Dutch
+               <span class="foreign notranslate">
+                knaap
+               </span>
+               "a youth, servant," Middle High German
+               <span class="foreign notranslate">
+                knappe
+               </span>
+               "a young squire," German
+               <span class="foreign notranslate">
+                Knappe
+               </span>
+               "squire, shield-bearer." Original sense unknown; Klein suggests the prehistoric meaning might have been "stick, piece of wood." For pronunciation, see
+               <a class="crossreference notranslate" href="/word/kn-" title="Etymology, meaning and definition of kn- ">
+                kn-
+               </a>
+               .
+              </p>
+<p>
+               Sense of "rogue, rascal" is first recorded c. 1200, presumably via sense evolution from "a menial" to "one of low birth," and the low character supposed to be characteristic of such a condition. But through Middle English it kept also its non-pejorative meaning, as in
+               <span class="foreign notranslate">
+                knave-child
+               </span>
+               (Scottish
+               <span class="foreign notranslate">
+                knave-bairn
+               </span>
+               ) "male child." In playing cards, "the lowest court card," 1560s.
+              </p>
+<blockquote>
+               Previously, the English equivalent of the French
+               <span class="foreign notranslate">
+                valet
+               </span>
+               was normally known as Knave, in the sense of 'serving-lad'. In the seventeenth century it came to be called Jack, from the name properly applied to the Knave of trumps at All Fours. All Fours being a low-class game, the use of 'Jack' for 'Knave' was long considered vulgar. ('He calls the Knaves
+               <span class="foreign notranslate">
+                Jacks
+               </span>
+               !', remarks Estella contemptuously in Dickens's
+               <span class="foreign notranslate">
+                Great Expectations
+               </span>
+               .) When indices came in, it was obviously preferable to use 'J' rather than 'Kn' to avoid confusion with 'K' for King. Jack has since become the normal title of the lowest court, though 'Knave' can still be heard. [David Parlett, "A History of Card Games," 1991]
+              </blockquote>
+</section>
+<span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms for
+        <em>
+         knave
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/baddie">
+          baddie
+         </a>
+</li>
+<li>
+<span class="wvrs">
+          (
+          <span class="wvl">
+           or
+          </span>
+<span class="wva">
+<a href="/dictionary/baddy">
+            baddy
+           </a>
+</span>
+          )
+         </span>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/beast">
+          beast
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/brute">
+          brute
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/caitiff">
+          caitiff
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/devil">
+          devil
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/evildoer">
+          evildoer
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/fiend">
+          fiend
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/heavy">
+          heavy
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/hound">
+          hound
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/meanie">
+          meanie
+         </a>
+</li>
+<li>
+<span class="wvrs">
+          (
+          <span class="wvl">
+           also
+          </span>
+<span class="wva">
+<a href="/dictionary/meany">
+            meany
+           </a>
+</span>
+          )
+         </span>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/miscreant">
+          miscreant
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/monster">
+          monster
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/nazi">
+          nazi
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/no-good">
+          no-good
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/rapscallion">
+          rapscallion
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/rascal">
+          rascal
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/reprobate">
+          reprobate
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/rogue">
+          rogue
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/savage">
+          savage
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/scalawag">
+          scalawag
+         </a>
+</li>
+<li>
+<span class="wvrs">
+          (
+          <span class="wvl">
+           or
+          </span>
+<span class="wva">
+<a href="/dictionary/scallywag">
+            scallywag
+           </a>
+</span>
+          )
+         </span>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/scamp">
+          scamp
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/scapegrace">
+          scapegrace
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/scoundrel">
+          scoundrel
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/varlet">
+          varlet
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/villain">
+          villain
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/wretch">
+          wretch
+         </a>
+</li>
+</ul>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         knave
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         he plays the role of the duplicitous
+         <em class="mw_t_it">
+          knave
+         </em>
+         who tries to foil the play's hero
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="7618029">
+<span class="t has-aq">
+          The supporting cast includes
+          <em>
+           knaves
+          </em>
+          and villans such as outlaw John Wesley Hardin, Mexican General Santa Anna and swindler Billy Sol Estes.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           John Maccormack,
+           <em>
+            ExpressNews.com
+           </em>
+           , 27 May 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="7100373">
+<span class="t has-aq">
+          Identifying Figueras as a fellow-
+          <em>
+           knave
+          </em>
+          , Cassidy gives him a delicate sin to commit.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Anthony Lane,
+           <em>
+            The New Yorker
+           </em>
+           , 28 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="6883794">
+<span class="t has-aq">
+          Anybody who makes firm predictions now is a fool or a
+          <em>
+           knave
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           John Cassidy,
+           <em>
+            The New Yorker
+           </em>
+           , 28 Feb. 2020
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="4072557">
+<span class="t has-aq">
+          The Founding Fathers were not unaware of the possibility that a demagogue or a
+          <em>
+           knave
+          </em>
+          might win the presidency.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ezra Klein,
+           <em>
+            Vox
+           </em>
+           , 6 Sep. 2018
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="1109680">
+<span class="t has-aq">
+          Anyone who has observed both major parties over the decades knows that each party has its share of fools,
+          <em>
+           knaves
+          </em>
+          , and outright crooks.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           John Fund,
+           <em>
+            National Review
+           </em>
+           , 8 Oct. 2017
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         knave
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        before the 12th century, in the meaning defined at
+        <a href="#h1">
+         sense 3
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         knave
+        </em>
+</h2>
+<p class="et">
+        Middle English, from Old English
+        <em class="mw_t_it">
+         cnafa
+        </em>
+        ; akin to Old High German
+        <em class="mw_t_it">
+         knabo
+        </em>
+        boy
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       sabra
+      </h1>
+<br/>
+<span class="lbs">
+       ,
+       <span class="lb">
+        often capitalized
+       </span>
+</span>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈsä-brə
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/sabra001.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           sabra
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a native-born Israeli
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Sabra">
+              Sabra
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "Jew born in Palestine" (or, after 1948, Israel), 1945, from Modern Hebrew
+               <span class="foreign notranslate">
+                sabrah,
+               </span>
+               literally "prickly pear."
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1948">
+               1948
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         sabra
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="4098940">
+<span class="t has-aq">
+          Israelis often identify themselves with the
+          <em>
+           sabra
+          </em>
+          , the cactus fruit that has a prickly exterior and a soft interior and pride themselves on their frankness and shameless audacity.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ruth Eglash,
+           <em>
+            The Seattle Times
+           </em>
+           , 4 Sep. 2018
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         sabra
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1945, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         sabra
+        </em>
+</h2>
+<p class="et">
+        Modern Hebrew
+        <em class="mw_t_it">
+         ṣabhār
+        </em>
+        , literally, prickly pear
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       earlock
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈir-ˌläk
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/earloc01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           earlock
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a curl of hair hanging in front of the ear
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         earlock
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        before the 12th century, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="g-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Seychelles
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+       geographical name
+      </span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        sā-ˈshel(z)
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/gg/ggseyc01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Seychelles
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+             island group in the western Indian Ocean northeast of Madagascar and south of the Equator; capital Victoria (on Mahé Island)
+             <em class="mw_t_it">
+              area
+             </em>
+             176 square miles (455 square kilometers),
+             <em class="mw_t_it">
+              population
+             </em>
+             94,600
+            </span>
+<p class="snote">
+<span class="note-txt">
+              Note:
+             </span>
+             Formerly a British colony, Seychelles has been a republic in the Commonwealth of Nations since 1976.
+            </p>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Seychelles">
+              Online Etymolgy for Seychelles
+              <!-- -->
+</h2>
+<section class="word__defination--2q7ZH">
+<p>
+               renamed 1756 in honor of French finance minister Jean Moreau de
+               <span class="foreign notranslate">
+                Séchelles
+               </span>
+               ; the spelling was altered by the English when they took the islands from France in 1794. Related:
+               <span class="foreign notranslate">
+                Seychellois
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1756">
+               1756
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         Seychelles
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         Seychellois
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˌsā-​shəl-​ˈwä
+         </span>
+<a class="play-pron" data-dir="gg" data-file="ggse01vr" data-lang="en_us" data-title="How to pronounce Seychelles (audio)" href="/dictionary/Seychelles?pronunciation&amp;lang=en_us&amp;dir=gg&amp;file=ggse01vr" title="How to pronounce Seychelles (audio)">
+<img alt="How to pronounce Seychelles (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+<span class="addPunct">
+          ,
+         </span>
+<span class="mw">
+          -​ˌshel-​
+         </span>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         noun
+        </span>
+</div>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       proselytise
+      </h1>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           proselytise
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<p class="cxl-ref">
+<span class="cxl">
+         British spelling of
+        </span>
+<a class="cxt text-uppercase" href="proselytize" rel="prev">
+         proselytize
+        </a>
+</p>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of proselytise">
+              Online Etymolgy for proselytise
+              <!-- -->
+<!-- -->
+              (v.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               chiefly British English spelling of
+               <a class="crossreference notranslate" href="/word/proselytize" title="Etymology, meaning and definition of proselytize ">
+                proselytize
+               </a>
+               (q.v.). For suffix, see
+               <a class="crossreference notranslate" href="/word/-ize" title="Etymology, meaning and definition of -ize ">
+                -ize
+               </a>
+               . Related:
+               <span class="foreign notranslate">
+                Proselytised
+               </span>
+               ;
+               <span class="foreign notranslate">
+                proselytising
+               </span>
+               .
+              </p>
+</section>
+<span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       fellah
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈfe-lə
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        fə-ˈlä
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fellah01.mp3">
+</audio>
+</div>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fellah02.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="il plural">
+        plural
+       </span>
+<span class="if">
+        fellahin
+       </span>
+<span class="il also">
+        also
+       </span>
+<span class="if">
+        fellaheen
+       </span>
+<span class="first-slash">
+        \
+       </span>
+<span class="prt-a">
+<span class="mw">
+         ˌfe-​lə-​ˈhēn
+        </span>
+<a class="play-pron" data-dir="f" data-file="fellah03" data-lang="en_us" data-title="How to pronounce fellah (audio)" href="/dictionary/fellah?pronunciation&amp;lang=en_us&amp;dir=f&amp;file=fellah03" title="How to pronounce fellah (audio)">
+<img alt="How to pronounce fellah (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+<span class="addPunct">
+         ,
+        </span>
+<span class="mw">
+         fə-​ˌlä-​ˈhēn
+        </span>
+</span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           fellah
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a peasant or agricultural laborer in an Arab country (such as Egypt)
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of fellah">
+              Online Etymolgy for fellah
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "Egyptian peasant," 1743, from Arabic
+               <span class="foreign notranslate">
+                fallah
+               </span>
+               "plowman," from
+               <span class="foreign notranslate">
+                falaha
+               </span>
+               "to plow, till (the soil)."
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1743">
+               1743
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         fellah
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1743, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         fellah
+        </em>
+</h2>
+<p class="et">
+        Arabic
+        <em class="mw_t_it">
+         fallāḥ
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="b-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Galen
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+       biographical name
+      </span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈgā-lən
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/bix/bixgal05.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Galen
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<span class="mw_t_sc">
+              a.d.
+             </span>
+             129–
+             <em class="mw_t_it">
+              circa
+             </em>
+             199 Greek physician and writer
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of Galen">
+              Online Etymolgy for Galen
+              <!-- -->
+</h2>
+<section class="word__defination--2q7ZH">
+<p>
+               celebrated Greek physician of 2c.; his work still was a foundation of medicine in the Middle Ages and his name is used figuratively for doctors.
+              </p>
+</section>
+<span>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         Galen
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         Galenic
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          gə-​ˈle-​nik
+         </span>
+<a class="play-pron" data-dir="bix" data-file="bixgal06" data-lang="en_us" data-title="How to pronounce Galen (audio)" href="/dictionary/Galen?pronunciation&amp;lang=en_us&amp;dir=bix&amp;file=bixgal06" title="How to pronounce Galen (audio)">
+<img alt="How to pronounce Galen (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="vr">
+<span class="vl">
+          or
+         </span>
+<span class="va" id="Galenical-anchor">
+          Galenical
+         </span>
+<span class="first-slash">
+          \
+         </span>
+<span class="prt-a">
+<span class="mw">
+           gə-​ˈle-​ni-​kəl
+          </span>
+<a class="play-pron" data-dir="bix" data-file="bixgal07" data-lang="en_us" data-title="How to pronounce Galen (audio)" href="/dictionary/Galen?pronunciation&amp;lang=en_us&amp;dir=bix&amp;file=bixgal07" title="How to pronounce Galen (audio)">
+<img alt="How to pronounce Galen (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+          \
+         </span>
+</span>
+<span class="fl">
+         adjective
+        </span>
+</div>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       arboretum
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˌär-bə-ˈrē-təm
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/arbore06.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="il plural">
+        plural
+       </span>
+<span class="if">
+        arboretums
+       </span>
+<span class="il or">
+        or
+       </span>
+<span class="if">
+        arboreta
+       </span>
+<span class="first-slash">
+        \
+       </span>
+<span class="prt-a">
+<span class="mw">
+         ˌär-​bə-​ˈrē-​tə
+        </span>
+<a class="play-pron" data-dir="a" data-file="arbore07" data-lang="en_us" data-title="How to pronounce arboretum (audio)" href="/dictionary/arboretum?pronunciation&amp;lang=en_us&amp;dir=a&amp;file=arbore07" title="How to pronounce arboretum (audio)">
+<img alt="How to pronounce arboretum (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           arboretum
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a place where trees, shrubs, and herbaceous plants are cultivated for scientific and educational purposes
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of arboretum">
+              Online Etymolgy for arboretum
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "tree-garden, place where trees or shrubs are cultivated," 1838, from Latin
+               <span class="foreign notranslate">
+                arboretum
+               </span>
+               , literally "a place grown with trees," from
+               <span class="foreign notranslate">
+                arbor
+               </span>
+               "tree" (see
+               <a class="crossreference notranslate" href="/word/arbor#etymonline_v_52391" title="Etymology, meaning and definition of arbor ">
+                arbor
+               </a>
+               (n.2)) +
+               <span class="foreign notranslate">
+                -etum
+               </span>
+               , suffix used to form the names of gardens and woods.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1838">
+               1838
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         arboretum
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11916543">
+<span class="t has-aq">
+          On a cloudy Wednesday afternoon this fall, the
+          <em>
+           arboretum
+          </em>
+          was crawling with visitors.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            oregonlive
+           </em>
+           , 13 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11916544">
+<span class="t has-aq">
+          Unveiled Saturday, the
+          <em>
+           arboretum
+          </em>
+          honors the cemetery’s longest-serving sexton, Mark Smith.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            The Salt Lake Tribune
+           </em>
+           , 6 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11916545">
+<span class="t has-aq">
+          The
+          <em>
+           arboretum
+          </em>
+          employs 206, including seasonal workers.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Dan Singer,
+           <em>
+            Dallas News
+           </em>
+           , 16 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11916546">
+<span class="t has-aq">
+          Because of the
+          <em>
+           arboretum
+          </em>
+          , the epicenter of peacock enthusiasm, and ire, has long been Arcadia.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Los Angeles Times
+           </em>
+           , 17 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11916547">
+<span class="t has-aq">
+          In 2010, the first regional tree census from the
+          <em>
+           arboretum
+          </em>
+          helped create a blueprint for where trees were most needed and what was happening with the forest.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Morgan Greene,
+           <em>
+            chicagotribune.com
+           </em>
+           , 30 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11708127">
+<span class="t has-aq">
+          On display is also a selection of Native American arts and textiles, African sculpture and arts, and an
+          <em>
+           arboretum
+          </em>
+          replete with rare plants.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Kaye Toal,
+           <em>
+            Travel + Leisure
+           </em>
+           , 6 July 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11708128">
+<span class="t has-aq">
+          Hundreds of people dressed in bright pastel colors meandered through the
+          <em>
+           arboretum
+          </em>
+          Saturday, picnicking and taking photos surrounded by the blooming tulips and azaleas.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Kelli Smith,
+           <em>
+            Dallas News
+           </em>
+           , 3 Apr. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11600530">
+<span class="t has-aq">
+          Spring is usually a big season at the
+          <em>
+           arboretum
+          </em>
+          , both for visitors and behind the scenes tending to the grounds.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Doug George,
+           <em>
+            chicagotribune.com
+           </em>
+           , 11 Oct. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         arboretum
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1796, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         arboretum
+        </em>
+</h2>
+<p class="et">
+        New Latin, from Latin, plantation of trees, from
+        <em class="mw_t_it">
+         arbor
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="b-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Vesalius
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+       biographical name
+      </span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        və-ˈsā-lē-əs
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -ˈzā-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/bix/bixves01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Vesalius
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+             Andreas 1514–1564 Belgian anatomist
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       squalid
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        adjective
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈskwä-ləd
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/squali01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           squalid
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             marked by filthiness and degradation from neglect or poverty
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/sordid">
+<span class="text-uppercase">
+               sordid
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of squalid">
+              Online Etymolgy for squalid
+              <!-- -->
+<!-- -->
+              (adj.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "foul, filthy, extremely dirty," especially from lack of care or cultivation, 1590s, from French
+               <span class="foreign notranslate">
+                squalide
+               </span>
+               and directly from Latin
+               <span class="foreign notranslate">
+                squalidus
+               </span>
+               "rough, coated with dirt, filthy," related to
+               <span class="foreign notranslate">
+                squales
+               </span>
+               "filth,"
+               <span class="foreign notranslate">
+                squalus
+               </span>
+               "filthy,"
+               <span class="foreign notranslate">
+                squalare
+               </span>
+               "be covered with a rough, stiff layer, be coated with dirt, be filthy," all of uncertain origin. De Vaan offers no etymology. Figuratively, "morally degraded or repulsive," 1650s. Related:
+               <span class="foreign notranslate">
+                Squalidly
+               </span>
+               ;
+               <span class="foreign notranslate">
+                squalidness
+               </span>
+               ;
+               <span class="foreign notranslate">
+                squalidity
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1590s">
+               1590s
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         squalid
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         squalidly
+        </span>
+<span class="fl">
+         adverb
+        </span>
+</div>
+<div class="uro">
+<span class="ure">
+         squalidness
+        </span>
+<span class="fl">
+         noun
+        </span>
+</div>
+</div>
+<div class="widget syns_discussion syns-module-anchor" id="synonym-discussion-anchor">
+<h2>
+        Choose the Right Synonym for
+        <em>
+         squalid
+        </em>
+</h2>
+<p class="syn">
+<a class="mw_t_sc" href="/dictionary/dirty">
+         dirty
+        </a>
+        ,
+        <a class="mw_t_sc" href="/dictionary/filthy">
+         filthy
+        </a>
+        ,
+        <a class="mw_t_sc" href="/dictionary/foul">
+         foul
+        </a>
+        ,
+        <a class="mw_t_sc" href="/dictionary/nasty">
+         nasty
+        </a>
+        ,
+        <a class="mw_t_sc" href="/dictionary/squalid">
+         squalid
+        </a>
+        mean conspicuously unclean or impure.
+        <a class="mw_t_sc" href="/dictionary/dirty">
+         dirty
+        </a>
+        emphasizes the presence of dirt more than an emotional reaction to it.
+        <span class="ex-sent first-child t no-aq sents">
+         a
+         <em class="mw_t_it">
+          dirty
+         </em>
+         littered street
+        </span>
+<a class="mw_t_sc" href="/dictionary/filthy">
+         filthy
+        </a>
+        carries a strong suggestion of offensiveness and typically of gradually accumulated dirt that begrimes and besmears.
+        <span class="ex-sent first-child t no-aq sents">
+         a stained greasy floor, utterly
+         <em class="mw_t_it">
+          filthy
+         </em>
+</span>
+<a class="mw_t_sc" href="/dictionary/foul">
+         foul
+        </a>
+        implies extreme offensiveness and an accumulation of what is rotten or stinking.
+        <span class="ex-sent first-child t no-aq sents">
+         a
+         <em class="mw_t_it">
+          foul
+         </em>
+         -smelling open sewer
+        </span>
+<a class="mw_t_sc" href="/dictionary/nasty">
+         nasty
+        </a>
+        applies to what is actually foul or is repugnant to one expecting freshness, cleanliness, or sweetness.
+        <span class="ex-sent first-child t no-aq sents">
+         it's a
+         <em class="mw_t_it">
+          nasty
+         </em>
+         job to clean up after a sick cat
+        </span>
+        In practice,
+        <em class="mw_t_it">
+         nasty
+        </em>
+        is often weakened to the point of being no more than a synonym of
+        <em class="mw_t_it">
+         unpleasant
+        </em>
+        or
+        <em class="mw_t_it">
+         disagreeable
+        </em>
+        .
+        <span class="ex-sent first-child t no-aq sents">
+         had a
+         <em class="mw_t_it">
+          nasty
+         </em>
+         fall
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         his answer gave her a
+         <em class="mw_t_it">
+          nasty
+         </em>
+         shock
+        </span>
+<a class="mw_t_sc" href="/dictionary/squalid">
+         squalid
+        </a>
+        adds to the idea of dirtiness and filth that of slovenly neglect.
+        <span class="ex-sent first-child t no-aq sents">
+<span class="mw_t_sp">
+<em class="mw_t_it">
+           squalid
+          </em>
+          slums
+         </span>
+</span>
+        All these terms are also applicable to moral uncleanness or baseness or obscenity.
+        <a class="mw_t_sc" href="/dictionary/dirty">
+         dirty
+        </a>
+        then stresses meanness or despicableness
+        <span class="ex-sent first-child t no-aq sents">
+         don't ask me to do your
+         <em class="mw_t_it">
+          dirty
+         </em>
+         work
+        </span>
+        , while
+        <a class="mw_t_sc" href="/dictionary/filthy">
+         filthy
+        </a>
+        and
+        <a class="mw_t_sc" href="/dictionary/foul">
+         foul
+        </a>
+        describe disgusting obscenity or loathsome behavior
+        <span class="ex-sent first-child t no-aq sents">
+<span class="mw_t_sp">
+<em class="mw_t_it">
+           filthy
+          </em>
+          street language
+         </span>
+</span>
+<span class="ex-sent first-child t no-aq sents">
+         a
+         <em class="mw_t_it">
+          foul
+         </em>
+         story of lust and greed
+        </span>
+        , and
+        <a class="mw_t_sc" href="/dictionary/nasty">
+         nasty
+        </a>
+        implies a peculiarly offensive unpleasantness.
+        <span class="ex-sent first-child t no-aq sents">
+         a stand-up comedian known for
+         <em class="mw_t_it">
+          nasty
+         </em>
+         humor
+        </span>
+        Distinctively,
+        <a class="mw_t_sc" href="/dictionary/squalid">
+         squalid
+        </a>
+        implies sordidness as well as baseness and dirtiness.
+        <span class="ex-sent first-child t no-aq sents">
+         engaged in a series of
+         <em class="mw_t_it">
+          squalid
+         </em>
+         affairs
+        </span>
+</p>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         squalid
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         The family lived in
+         <em class="mw_t_it">
+          squalid
+         </em>
+         conditions.
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11932502">
+<span class="t has-aq">
+          But a threat President Aleksandr G. Lukashenko has never before had to contend with is now taking shape in a
+          <em>
+           squalid
+          </em>
+          migrant encampment along his country’s border with Poland.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            New York Times
+           </em>
+           , 17 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11932503">
+<span class="t has-aq">
+          The sharp decline occurred after the sudden arrival of thousands of Haitians to a
+          <em>
+           squalid
+          </em>
+          encampment in Del Rio, Texas, garnered international headlines.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Camilo Montoya-galvez,
+           <em>
+            CBS News
+           </em>
+           , 15 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11932504">
+<span class="t has-aq">
+          For years, she and her siblings were held captive in
+          <em>
+           squalid
+          </em>
+          conditions and shielded from the public by their parents.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Nathan Solis,
+           <em>
+            Los Angeles Times
+           </em>
+           , 11 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11932505">
+<span class="t has-aq">
+          Florence police say a woman faces several charges after officers found her children in an apartment in
+          <em>
+           squalid
+          </em>
+          conditions.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           William Thornton | Wthornton@al.com,
+           <em>
+            al
+           </em>
+           , 8 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11824483">
+<span class="t has-aq">
+          The pet activists pointed out in a memo to the council that an ordinance would also protect consumers from possibly unhealthy animals coming from
+          <em>
+           squalid
+          </em>
+          puppy and kitten mills and from hidden high interest rates when purchasing an animal.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Karen Caffarini,
+           <em>
+            chicagotribune.com
+           </em>
+           , 4 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11824484">
+<span class="t has-aq">
+          Thousands of people live in
+          <em>
+           squalid
+          </em>
+          shelters after their homes were razed in recent months as a result of rampant gang violence.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            BostonGlobe.com
+           </em>
+           , 25 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11824485">
+<span class="t has-aq">
+          In this harrowing tale that echoes our current moment, a group of clothed people imprison a coterie of naked people in a
+          <em>
+           squalid
+          </em>
+          house.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Tiana Reid,
+           <em>
+            Vulture
+           </em>
+           , 31 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11824486">
+<span class="t has-aq">
+          The Battle of Blair Mountain saw 10,000 West Virginia coal miners march in protest of perilous work conditions,
+          <em>
+           squalid
+          </em>
+          housing and low wages, among other grievances.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Abby Lee Hood,
+           <em>
+            Smithsonian Magazine
+           </em>
+           , 25 Aug. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         squalid
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1596, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         squalid
+        </em>
+</h2>
+<p class="et">
+        Latin
+        <em class="mw_t_it">
+         squalidus
+        </em>
+        rough, dirty, from
+        <em class="mw_t_it">
+         squalēre
+        </em>
+        to be covered with scales or dirt, from
+        <em class="mw_t_it">
+         squalus
+        </em>
+        dirty; perhaps akin to Latin
+        <em class="mw_t_it">
+         squama
+        </em>
+        scale
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       inanity
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        i-ˈna-nə-tē
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/inanit02.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="il plural">
+        plural
+       </span>
+<span class="if">
+        inanities
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           inanity
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the quality or state of being
+             <a class="mw_t_a_link" href="/dictionary/inane">
+              inane
+             </a>
+             : such as
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-a">
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             vapid, pointless, or fatuous character
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/shallowness">
+<span class="text-uppercase">
+               shallowness
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+<span class="sb-2">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             lack of substance
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/emptiness">
+<span class="text-uppercase">
+               emptiness
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             something that is inane
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of inanity">
+              Online Etymolgy for inanity
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               c. 1600, "emptiness, hollowness," literal and figurative, from French
+               <span class="foreign notranslate">
+                inanité
+               </span>
+               (14c.) or directly from Latin
+               <span class="foreign notranslate">
+                inanitas
+               </span>
+               "emptiness, empty space," figuratively "worthlessness," noun of quality from
+               <span class="foreign notranslate">
+                inanis
+               </span>
+               "empty, void; worthless, useless," a word of uncertain origin. De Vaan writes that "The chronology of attestations suggests that 'empty, devoid of' is older than 'hollow'." Meaning "silliness, want of intelligence" is from 1753.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:c.%201600">
+               c. 1600
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms for
+        <em>
+         inanity
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/absurdity">
+          absurdity
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/asininity">
+          asininity
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/b%C3%AAtise">
+          bêtise
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/fatuity">
+          fatuity
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/folly">
+          folly
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/foolery">
+          foolery
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/foppery">
+          foppery
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/idiocy">
+          idiocy
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/imbecility">
+          imbecility
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/insanity">
+          insanity
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/lunacy">
+          lunacy
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/stupidity">
+          stupidity
+         </a>
+</li>
+</ul>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         inanity
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         quickly realized that her suggestion was an
+         <em class="mw_t_it">
+          inanity
+         </em>
+         and withdrew it
+        </span>
+<span class="ex-sent first-child t no-aq sents">
+         the jaw-dropping
+         <em class="mw_t_it">
+          inanity
+         </em>
+         of the singer's comments on the awards show
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11739770">
+<span class="t has-aq">
+          Today critics continue to question some of the methods of the pollsters: their choice of population samples, their neutrality, sometimes the
+          <em>
+           inanity
+          </em>
+          of their questions.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Joseph Epstein,
+           <em>
+            WSJ
+           </em>
+           , 26 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11631980">
+<span class="t has-aq">
+          The fact that the agency is not just a large organization, but a highly secretive, government organization, means that CIA officers are subjected to additional wrinkles of
+          <em>
+           inanity
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           David Mccloskey,
+           <em>
+            CNN
+           </em>
+           , 11 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11524357">
+<span class="t has-aq">
+          The conceit established, Kasulke turns to more alluring tasks: cataloguing types of Slack users, parsing the app’s tonal shifts, and satirizing the
+          <em>
+           inanity
+          </em>
+          of office life.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Katy Waldman,
+           <em>
+            The New Yorker
+           </em>
+           , 23 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11416310">
+<span class="t has-aq">
+          The Dolphins escaped this particular
+          <em>
+           inanity
+          </em>
+          without giving up a point, but Waddle collected his punt muff, possessed the ball, tucked the ball and then had an elbow down before the ball came free again.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Steve Svekis,
+           <em>
+            sun-sentinel.com
+           </em>
+           , 19 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10788275">
+<span class="t has-aq">
+          But this is not the kind of show that deserves acclaim for its
+          <em>
+           inanity
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Kelly Lawler,
+           <em>
+            USA TODAY
+           </em>
+           , 8 July 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10678625">
+<span class="t has-aq">
+          Clay Travis — formerly a right-wing sports-talk personality who has managed to parlay his particular brand of
+          <em>
+           inanity
+          </em>
+          into being one of the replacements for Rush Limbaugh — could not resist the opportunity.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Bill Goodykoontz,
+           <em>
+            The Arizona Republic
+           </em>
+           , 18 June 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9709745">
+<span class="t has-aq">
+          The latest poll on the Biden administration's pandemic rescue plan underscores the
+          <em>
+           inanity
+          </em>
+          of congressional Republicans' unified opposition.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Arkansas Online
+           </em>
+           , 6 Mar. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="9709746">
+<span class="t has-aq">
+          But that does not make this
+          <em>
+           inanity
+          </em>
+          of this song forgivable.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Steve Baltin,
+           <em>
+            Forbes
+           </em>
+           , 3 Mar. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         inanity
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1603, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       fondue
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        fän-ˈdü
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -ˈdyü
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈfän-ˌd(y)ü
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fondue01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+<span class="vl">
+         or less commonly
+        </span>
+<span class="va" id="fondu-anchor">
+         fondu
+        </span>
+</span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           fondue
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a dish similar to a soufflé usually made with cheese and bread crumbs
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-subnum has-num has-let">
+<span class="sb-0">
+<div class="pseq no-subnum">
+<div class="sense has-sn has-subnum">
+<span class="sn sense-2 a (1)">
+<span class="num">
+              2
+             </span>
+<span class="letter">
+              a
+             </span>
+<span class="sub-num">
+              (1)
+             </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+               :
+              </strong>
+              a preparation of melted cheese (such as Swiss cheese and Gruyère) usually flavored with white wine and kirsch
+             </span>
+</span>
+</div>
+<div class="sense has-sn has-subnum">
+<span class="sn sense-(2)">
+<span class="sub-num">
+              (2)
+             </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+               :
+              </strong>
+              a dish that consists of small pieces of food (such as meat or fruit) cooked in or dipped into a hot liquid
+             </span>
+<span class="ex-sent first-child t no-aq sents">
+              beef
+              <span class="mw_t_wi">
+               fondue
+              </span>
+</span>
+<span class="ex-sent t no-aq sents">
+              chocolate
+              <span class="mw_t_wi">
+               fondue
+              </span>
+</span>
+</span>
+</div>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a chafing dish in which fondue is made
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of fondue">
+              Online Etymolgy for fondue
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               1781 as a French word in English; naturalized from c. 1800, from French cooking term
+               <span class="foreign notranslate">
+                fondue
+               </span>
+               "a cheese-pudding," literally "melted" (15c.), noun use of fem. of
+               <span class="foreign notranslate">
+                fondu
+               </span>
+               , past-participle adjective from
+               <span class="foreign notranslate">
+                fondre
+               </span>
+               "to melt," from Latin
+               <span class="foreign notranslate">
+                fundere
+               </span>
+               (past participle
+               <span class="foreign notranslate">
+                fusus
+               </span>
+               ) "to melt, cast, pour out" (from nasalized form of PIE root
+               <a class="crossreference notranslate" href="/word/*gheu-" title="Etymology, meaning and definition of *gheu- ">
+                *gheu-
+               </a>
+               "to pour").
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1781">
+               1781
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         fondue
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         dip fruit in melted chocolate to have a chocolate
+         <em class="mw_t_it">
+          fondue
+         </em>
+</span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11801839">
+<span class="t has-aq">
+          Or perhaps accidentally leave his charge at the chocolate
+          <em>
+           fondue
+          </em>
+          station?
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 14 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11594375">
+<span class="t has-aq">
+          Executed by Chef de Cuisine Mark Zuckerman, the meal begins with a selection of snacks including Jonah crab
+          <em>
+           fondue
+          </em>
+          with sea urchin, vadouvan, scallop au gratin with Noilly Prat and orange, and caviar service with Regiis Ova Caviar.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Melissa Kravitz Hoeffner,
+           <em>
+            Forbes
+           </em>
+           , 30 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11486427">
+<span class="t has-aq">
+          Very adaptable as an appetizer, in a
+          <em>
+           fondue
+          </em>
+          or a frittata, it can be breaded and fried.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lana Bortolot,
+           <em>
+            Forbes
+           </em>
+           , 27 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11379559">
+<span class="t has-aq">
+          Post-race party: All runners celebrate their accomplishments with a special finisher mug that includes
+          <em>
+           fondue
+          </em>
+          and our very own hot chocolate, both 100% dark chocolate and specifically made for the Hot Chocolate 15K/5K.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Usa Today Ventures Events,
+           <em>
+            The Indianapolis Star
+           </em>
+           , 16 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11379558">
+<span class="t has-aq">
+          The
+          <em>
+           fondue
+          </em>
+          came with bread and several sides, including apples, potatoes and pickles.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 26 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11273668">
+<span class="t has-aq">
+          Look for the chickpea sandwich, and french fries topped with Swiss
+          <em>
+           fondue
+          </em>
+          , crispy pastrami and jalapeño, plus other sandwiches.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Elena Kadvany,
+           <em>
+            San Francisco Chronicle
+           </em>
+           , 25 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11061070">
+<span class="t has-aq">
+          Towards the end of the evening as the night began to wind down, Cardi also showed off some dessert options that were served for the occasion, including a giant chocolate
+          <em>
+           fondue
+          </em>
+          fountain.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Nicholas Rice,
+           <em>
+            PEOPLE.com
+           </em>
+           , 11 July 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="10963922">
+<span class="t has-aq">
+          From its dandyish business casual to its crockpots of
+          <em>
+           fondue
+          </em>
+          so much of it seems so charmingly bygone, so sentimentally lost.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 19 May 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         fondue
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1824, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         fondue
+        </em>
+</h2>
+<p class="et">
+        borrowed from French, noun derivative from feminine of
+        <em class="mw_t_it">
+         fondu,
+        </em>
+        past participle of
+        <em class="mw_t_it">
+         fondre
+        </em>
+        "to melt," going back to Old French  — more at
+        <a class="mw_t_mat" href="/dictionary/found#etymology">
+         found
+         <span class="text-lowercase">
+          entry
+         </span>
+         5
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       shofar
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈshō-ˌfär
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        -fər
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/shofar01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="il plural">
+        plural
+       </span>
+<span class="if">
+        shofroth
+       </span>
+<span class="first-slash">
+        \
+       </span>
+<span class="prt-a">
+<span class="mw">
+         shō-​ˈfrōt
+        </span>
+<a class="play-pron" data-dir="s" data-file="shofar02" data-lang="en_us" data-title="How to pronounce shofar (audio)" href="/dictionary/shofar?pronunciation&amp;lang=en_us&amp;dir=s&amp;file=shofar02" title="How to pronounce shofar (audio)">
+<img alt="How to pronounce shofar (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+<span class="addPunct">
+         ,
+        </span>
+<span class="mw">
+         -​ˈfrōth
+        </span>
+<span class="addPunct">
+         ,
+        </span>
+<span class="mw">
+         -​ˈfrōs
+        </span>
+</span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           shofar
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             the horn of a ruminant animal and usually a ram blown as a trumpet by the ancient Hebrews in battle and during religious observances and used in modern Judaism especially during Rosh Hashanah and at the end of Yom Kippur
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of shofar">
+              Online Etymolgy for shofar
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               also
+               <span class="foreign notranslate">
+                shophar
+               </span>
+               , ram's horn blown on Rosh Hashanah and Yom Kippur, 1833, from Hebrew
+               <span class="foreign notranslate">
+                shophar
+               </span>
+               "ram's horn," related to Arabic
+               <span class="foreign notranslate">
+                sawafiru
+               </span>
+               "ram's horns," Akkadian
+               <span class="foreign notranslate">
+                shapparu
+               </span>
+               "wild goat."
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1833">
+               1833
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="widget illustrations" id="art-anchor">
+<h2>
+        Illustration of
+        <em>
+         shofar
+        </em>
+</h2>
+<img alt="Illustration of shofar" class="lazyload" data-src="https://merriam-webster.com/assets/mw/static/art/dict/shofar.gif"/>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         shofar
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11932179">
+<span class="t has-aq">
+          The ram’s horn, or
+          <em>
+           shofar
+          </em>
+          , is sounded throughout the Jewish high holidays of Rosh Hashanah and Yom Kippur as a call for Jews to reflect, reform and repent.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Joe Lieberman,
+           <em>
+            WSJ
+           </em>
+           , 9 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11932177">
+<span class="t has-aq">
+          There are many interpretations of the
+          <em>
+           shofar
+          </em>
+          ’s meaning.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Marina Pitofsky,
+           <em>
+            USA TODAY
+           </em>
+           , 2 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11932178">
+<span class="t has-aq">
+          Some synagogues are bringing their congregations outside to hear the
+          <em>
+           shofar
+          </em>
+          at the end of the service, rather than during it.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Philissa Cramer,
+           <em>
+            sun-sentinel.com
+           </em>
+           , 24 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11824170">
+<span class="t has-aq">
+          Is the
+          <em>
+           shofar
+          </em>
+          — the horn whose blasts punctuate the holy days — a potential vector of disease?
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Philissa Cramer,
+           <em>
+            sun-sentinel.com
+           </em>
+           , 24 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11724378">
+<span class="t has-aq">
+          This also includes
+          <em>
+           shofar
+          </em>
+          blowing and opportunities for family interactive reflective activities.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Miriam Marini,
+           <em>
+            Detroit Free Press
+           </em>
+           , 6 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11616622">
+<span class="t has-aq">
+          The day ends with again blowing the
+          <em>
+           shofar
+          </em>
+          , symbolizing the closing of the Book of Life.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Emily Vanschmus,
+           <em>
+            Better Homes &amp; Gardens
+           </em>
+           , 8 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11508637">
+<span class="t has-aq">
+          Synagogues will also blow a
+          <em>
+           shofar
+          </em>
+          , a curved ram's horn, during Rosh Hashanah.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Marina Pitofsky,
+           <em>
+            USA TODAY
+           </em>
+           , 2 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11295144">
+<span class="t has-aq">
+          Rosh Hashanah begins with the blowing of a
+          <em>
+           shofar
+          </em>
+          , or ram’s horn.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            al
+           </em>
+           , 6 Sep. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         shofar
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1833, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         shofar
+        </em>
+</h2>
+<p class="et">
+        Hebrew
+        <em class="mw_t_it">
+         shōphār
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="g-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Moriah
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+       geographical name
+      </span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        mə-ˈrī-ə
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/gg/ggmori01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Moriah
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+             hill in the eastern part of Jerusalem
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       ramshackle
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        adjective
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈram-ˌsha-kəl
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/ramsha01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           ramshackle
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             appearing ready to collapse
+             <strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/rickety">
+<span class="text-uppercase">
+               rickety
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             carelessly or loosely constructed
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             a
+             <span class="mw_t_wi">
+              ramshackle
+             </span>
+             plot
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of ramshackle">
+              Online Etymolgy for ramshackle
+              <!-- -->
+<!-- -->
+              (adj.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "loosely joined, ill-made or out of good condition; chaotic or likely to collapse," 1809, an alternative form of
+               <span class="foreign notranslate">
+                ramshackled
+               </span>
+               , earlier
+               <span class="foreign notranslate">
+                ranshackled
+               </span>
+               (1670s), an alteration of
+               <span class="foreign notranslate">
+                ransackled
+               </span>
+               , past participle of
+               <span class="foreign notranslate">
+                ransackle
+               </span>
+               (from the same source as
+               <a class="crossreference notranslate" href="/word/ransack" title="Etymology, meaning and definition of ransack ">
+                ransack
+               </a>
+               ). "Said chiefly of carriages and houses" [OED]. This form of the word seems to have been originally Scottish.
+              </p>
+<blockquote>
+               Reading over this note to an American gentleman, he seemed to take alarm, lest the word
+               <span class="foreign notranslate">
+                ramshackle
+               </span>
+               should be
+               <span class="foreign notranslate">
+                palmed
+               </span>
+               on his country. I take it home willingly, as a Scotticism, and one well applied, as may be afterwards shown. [Robert Gourlay, "General Introduction to a Statistical Account of Upper Canada," London, 1822]
+              </blockquote>
+<p>
+               Jamieson's "Etymological Dictionary of the Scottish Language" (1825) has it as a noun meaning "thoughtless, ignorant fellow."
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1809">
+               1809
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget little_gems little-gems-module-anchor-1" id="note-1-anchor">
+<h2>
+        The Evolution of
+        <span class="mw_t_parahw">
+         Ramshackle
+        </span>
+</h2>
+<p>
+<em>
+         Ramshackle
+        </em>
+        has nothing to do with rams, nor the act of being rammed, nor shackles. The word is an alteration of
+        <em>
+         ransackled
+        </em>
+        , an obsolete form of the verb
+        <a href="https://www.merriam-webster.com/dictionary/ransack">
+<em>
+          ransack
+         </em>
+</a>
+        , meaning "to search through or plunder." (
+        <em>
+         Ransack
+        </em>
+        in turn derives, via Middle English, from Old Norse words meaning "house" and "seek.") A home that has been ransacked has had its contents thrown into disarray, and that image may be what caused us to start using
+        <em>
+         ramshackle
+        </em>
+        in the first half of the 19th century to describe something that is poorly constructed or in a state of near collapse. These days,
+        <em>
+         ramshackle
+        </em>
+        can also be used figuratively, as in "He could only devise a ramshackle excuse for his absence."
+       </p>
+</div>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         ramshackle
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         The movie's
+         <em class="mw_t_it">
+          ramshackle
+         </em>
+         plot is confusing and not believable.
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11959170">
+<span class="t has-aq">
+          The
+          <em>
+           ramshackle
+          </em>
+          houses are heated with firewood and some still make do with an outdoor privy.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Alissa Simon,
+           <em>
+            Variety
+           </em>
+           , 12 Nov. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11851105">
+<span class="t has-aq">
+          Touchaleaume restored the
+          <em>
+           ramshackle
+          </em>
+          structures and later sold one in a Christie’s auction to the hotelier André Balazs for nearly $5 million.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            New York Times
+           </em>
+           , 11 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11851106">
+<span class="t has-aq">
+          Then, in 1908, a railroad worker stumbled onto a trove of gems in the dunes beside some track under repair in the Namib Desert near Lüderitz Bay, the
+          <em>
+           ramshackle
+          </em>
+          settlement that had risen at Angra Pequeña.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Joshua Hammer,
+           <em>
+            The New York Review of Books
+           </em>
+           , 19 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11751608">
+<span class="t has-aq">
+          With each new release, the War on Drugs refined and sharpened its sound, transitioning from folksy and
+          <em>
+           ramshackle
+          </em>
+          to high-tech and precise.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Mark Richardson,
+           <em>
+            WSJ
+           </em>
+           , 25 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11751609">
+<span class="t has-aq">
+          The tents, tarps, and cardboard shelters near the troubled intersection of Massachusetts Avenue and Melnea Cass Boulevard in Boston continued to serve as
+          <em>
+           ramshackle
+          </em>
+          refuges for the homeless, addicted, and lost on Monday.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            BostonGlobe.com
+           </em>
+           , 25 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11751607">
+<span class="t has-aq">
+          Godfrey’s CILTrust is housed at his Belize City law firm, in a four-story building on a narrow street of
+          <em>
+           ramshackle
+          </em>
+          houses and crumbling concrete storefronts.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            Washington Post
+           </em>
+           , 4 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11643779">
+<span class="t has-aq">
+          The modern town is awash in commercial billboards and
+          <em>
+           ramshackle
+          </em>
+          malls.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Lawrence Osborne,
+           <em>
+            Travel + Leisure
+           </em>
+           , 16 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11643780">
+<span class="t has-aq">
+          The Original Hooters operated out of a
+          <em>
+           ramshackle
+          </em>
+          wood structure before being almost entirely demolished and rebuilt in 2012.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            orlandosentinel.com
+           </em>
+           , 9 Oct. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         ramshackle
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1830, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         ramshackle
+        </em>
+</h2>
+<p class="et">
+        alteration of earlier
+        <em class="mw_t_it">
+         ransackled
+        </em>
+        , from past participle of obsolete
+        <em class="mw_t_it">
+         ransackle
+        </em>
+        , frequentative of
+        <em class="mw_t_it">
+         ransack
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       kepi
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈkā-pē
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈke-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/k/kepi0001.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="entry-attr vrs">
+       variants:
+       <span class="vr">
+<span class="vl">
+         or less commonly
+        </span>
+<span class="va" id="k--pi-anchor">
+         képi
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˈkā-​pē
+         </span>
+<a class="play-pron" data-dir="k" data-file="kepi0001" data-lang="en_us" data-title="How to pronounce kepi (audio)" href="/dictionary/kepi?pronunciation&amp;lang=en_us&amp;dir=k&amp;file=kepi0001" title="How to pronounce kepi (audio)">
+<img alt="How to pronounce kepi (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+</span>
+<span class="last-slash">
+         \
+        </span>
+</span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           kepi
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a military cap with a round flat top usually sloping toward the front and a visor
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of kepi">
+              Online Etymolgy for kepi
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               soldier's peaked cap, 1861, from French
+               <span class="foreign notranslate">
+                képi
+               </span>
+               (19c.), from German Swiss
+               <span class="foreign notranslate">
+                käppi
+               </span>
+               , diminutive of German
+               <span class="foreign notranslate">
+                Kappe
+               </span>
+               "a cap," from Late Latin
+               <span class="foreign notranslate">
+                cappa
+               </span>
+               "hood, cap" (see
+               <a class="crossreference notranslate" href="/word/cap#etymonline_v_694" title="Etymology, meaning and definition of cap ">
+                cap
+               </a>
+               (n.)). The usual style of uniform cap in the American Civil War.
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1861">
+               1861
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         kepi
+        </em>
+        in a Sentence
+       </h2>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="7238671">
+<span class="t has-aq">
+          Gendarmes walk the streets wearing
+          <em>
+           kepi
+          </em>
+          hats; the supermarkets sell vacherin and fond de veau.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Kate Holstein,
+           <em>
+            Condé Nast Traveler
+           </em>
+           , 10 Apr. 2020
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         kepi
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1861, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         kepi
+        </em>
+</h2>
+<p class="et">
+        French
+        <em class="mw_t_it">
+         képi
+        </em>
+        , from German dialect (Switzerland)
+        <em class="mw_t_it">
+         käppi
+        </em>
+        cap
+       </p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       carrion
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈker-ē-ən
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈka-rē-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/carrio01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           carrion
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt hasSdSense">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             dead and putrefying flesh
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             Vultures live chiefly on
+             <span class="mw_t_wi">
+              carrion
+             </span>
+             .
+            </span>
+</span>
+<span class="sdsense">
+<span class="sd">
+             also
+            </span>
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             flesh unfit for food
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of carrion">
+              Online Etymolgy for carrion
+              <!-- -->
+<!-- -->
+              (n.)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               early 13c.,
+               <span class="foreign notranslate">
+                carione
+               </span>
+               , "a dead body;" late 13c., "dead and putrefying flesh of animals;" from Anglo-French
+               <span class="foreign notranslate">
+                carogne
+               </span>
+               (Old North French
+               <span class="foreign notranslate">
+                caroigne
+               </span>
+               ; Old French
+               <span class="foreign notranslate">
+                charogne
+               </span>
+               ) "carrion, corpse" (12c., Modern French
+               <span class="foreign notranslate">
+                charogne
+               </span>
+               ), from Vulgar Latin
+               <span class="foreign notranslate">
+                *caronia
+               </span>
+               "carcass" (source of Italian
+               <span class="foreign notranslate">
+                carogna
+               </span>
+               , Spanish
+               <span class="foreign notranslate">
+                carroña
+               </span>
+               "carrion"), from Latin
+               <span class="foreign notranslate">
+                caro
+               </span>
+               "meat, flesh," originally "a piece of flesh" (from PIE root
+               <a class="crossreference notranslate" href="/word/*sker-#etymonline_v_52632" title="Etymology, meaning and definition of *sker- ">
+                *sker-
+               </a>
+               (1) "to cut").
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:early%2013c.">
+               early 13c.
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget example_sentences examples-module-anchor" id="examples-anchor">
+<h2>
+        Examples of
+        <em>
+         carrion
+        </em>
+        in a Sentence
+       </h2>
+<div class="in-sentences">
+<span class="ex-sent first-child t no-aq sents">
+         Vultures live chiefly on
+         <em class="mw_t_it">
+          carrion
+         </em>
+         .
+        </span>
+</div>
+<div class="on-web">
+<span class="ex-header function-label">
+         Recent Examples on the Web
+        </span>
+<span class="ex-sent sents" data-example-id="11799919">
+<span class="t has-aq">
+          The bloom’s putrid scent is designed to attract
+          <em>
+           carrion
+          </em>
+          -consuming rainforest beetles and flesh flies that pollinate the tiny florets at its center to produce seed berries.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+<em>
+            San Diego Union-Tribune
+           </em>
+           , 24 Oct. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11592446">
+<span class="t has-aq">
+          Didn’t play in trash, didn’t play in
+          <em>
+           carrion
+          </em>
+          like Speck.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ben Flanagan | Bflanagan@al.com,
+           <em>
+            al
+           </em>
+           , 29 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11592447">
+<span class="t has-aq">
+          Carrion crows wanted to mate with
+          <em>
+           carrion
+          </em>
+          crows, and hooded crows wanted to mate with hooded crows.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ben Crair,
+           <em>
+            The New Yorker
+           </em>
+           , 21 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11484578">
+<span class="t has-aq">
+          The genomes of hooded and
+          <em>
+           carrion
+          </em>
+          crows mapped almost perfectly onto one another.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Ben Crair,
+           <em>
+            The New Yorker
+           </em>
+           , 21 Sep. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11271839">
+<span class="t has-aq">
+          Black vultures survive, like most vultures, by eating
+          <em>
+           carrion
+          </em>
+          , or the remains of dead animals.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Sarah Bowman,
+           <em>
+            USA TODAY
+           </em>
+           , 17 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11271840">
+<span class="t has-aq">
+          Black vultures survive, like most vultures, by eating
+          <em>
+           carrion
+          </em>
+          , or the remains of dead animals.
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Sarah Bowman,
+           <em>
+            The Indianapolis Star
+           </em>
+           , 17 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11166895">
+<span class="t has-aq">
+          But across the street from the wall are a clutch of trailers desiccating like
+          <em>
+           carrion
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Elizabeth Weil,
+           <em>
+            ProPublica
+           </em>
+           , 22 Aug. 2021
+          </span>
+</span>
+</span>
+<span class="ex-sent sents" data-example-id="11166896">
+<span class="t has-aq">
+          The television talking heads pick over each and every juicy tidbit like vultures over
+          <em>
+           carrion
+          </em>
+          .
+         </span>
+<span class="aq has-aq">
+          —
+          <span class="aq">
+           Kay Jones,
+           <em>
+            CNN
+           </em>
+           , 13 Aug. 2021
+          </span>
+</span>
+</span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         carrion
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        14th century, in the meaning defined
+        <a href="#h1">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         carrion
+        </em>
+</h2>
+<p class="et">
+        Middle English
+        <em class="mw_t_it">
+         caroine
+        </em>
+        , from Anglo-French
+        <em class="mw_t_it">
+         caroine, charoine
+        </em>
+        , from Vulgar Latin
+        <em class="mw_t_it">
+         *caronia
+        </em>
+        , irregular from Latin
+        <em class="mw_t_it">
+         carn-, caro
+        </em>
+        flesh  — more at
+        <a class="mw_t_mat" href="/dictionary/carnal#etymology">
+         carnal
+        </a>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body>
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       Gaullism
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        noun
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈgō-ˌli-zəm
+       </span>
+<span class="addPunct">
+        ,
+       </span>
+<span class="pr">
+        ˈgȯ-
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/gaulli02.mp3">
+</audio>
+</div>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/gaulli01.mp3">
+</audio>
+</div>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           Gaullism
+          </em>
+</h2>
+<p class="entryNumbers">
+</p>
+</div>
+</div>
+<div class="vg">
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a French political movement during World War II led by Charles de
+             <a class="mw_t_a_link" href="/dictionary/Gaulle">
+              Gaulle
+             </a>
+             in opposition to the Vichy regime
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             a postwar French political movement led by Charles de Gaulle
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget uros uro-module-anchor" id="other-words-anchor">
+<h2>
+        Other Words from
+        <em>
+         Gaullism
+        </em>
+</h2>
+<div class="uro">
+<span class="ure">
+         Gaullist
+        </span>
+<span class="first-slash">
+         \
+        </span>
+<span class="prt-a">
+<span class="mw">
+          ˈgō-​list
+         </span>
+<a class="play-pron" data-dir="g" data-file="gaulli03" data-lang="en_us" data-title="How to pronounce Gaullism (audio)" href="/dictionary/Gaullism?pronunciation&amp;lang=en_us&amp;dir=g&amp;file=gaulli03" title="How to pronounce Gaullism (audio)">
+<img alt="How to pronounce Gaullism (audio)" class="svg" src="/images/svg/audio.svg"/>
+</a>
+<span class="addPunct">
+          ,
+         </span>
+<span class="mw">
+          ˈgȯ-​
+         </span>
+</span>
+<span class="last-slash">
+         \
+        </span>
+<span class="fl">
+         adjective or noun
+        </span>
+</div>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         Gaullism
+        </em>
+</h2>
+<p class="ety-sl" data-entry-id="1">
+        1943, in the meaning defined at
+        <a href="#h1">
+         sense 1
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         Gaullism
+        </em>
+</h2>
+<p class="et">
+        Charles de
+        <em class="mw_t_it">
+         Gaulle
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 440px;
+            margin:12px 12px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="TextInput">
+        /* Select the text box */
+        div.page-item {
+            width: 400px;
+        }
+
+        label[for="username"] {
+            border-radius:8px;
+            display:block;
+            width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            overflow-wrap: normal;
+            background-color: beige;
+        }
+
+        hr {
+            margin-right: 12px;
+            margin-left:12px;
+            width: 440px;
+        }
+
+        input[type="text"] {
+            display:block;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            width: 100%;
+            max-width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1; /* Soft gray border */
+            border-radius: 8px;        /* Modern rounded corners */
+            outline: none;
+            transition: all 0.15s ease-in-out; /* Smooth transition for focus effects */
+        }
+
+        input.correct {
+            background-color: aquamarine;
+            transition:none;
+        }
+        /* Modern focus state (glow/border color change) */
+        input[type="text"]:focus {
+            border-color: #3b82f6;     /* Vibrant modern blue */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Soft outer glow */
+        }
+
+        /* Placeholder styling */
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+</style>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all inputs once and loop through them
+        document.querySelectorAll('input').forEach(inputField => {
+            inputField.addEventListener('input', (event) => {
+                const field = event.target;
+                // Compare value to name and toggle the "correct" class
+                const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (field.value.toLowerCase() ===cleanWord.toLowerCase()) {
+                    field.classList.add("correct");
+                    field.value=field.name
+                } else {
+                    field.classList.remove("correct");
+                }
+            });
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    // Collect all input elements into an array for easy index tracking
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+            // Check if the pressed key is "Enter"
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault(); 
+                inputField.value=inputField.name
+                inputField.classList.add("correct")
+            }else{
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents accidental form submission
+                // Find the next input in the array and focus it
+                const nextInput = inputs[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+            }
+
+
+        });
+    });
+
+
+    });
+</script>
+</head>
+<body>
+<div class="main-container page-item">
+<label for="username">乐善好施者，乐于助人者</label>
+<input class="target" name="Samaritan" placeholder="S" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">sə-ˈmer-ə-tən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/samari01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">不诚实的人;恶棍</label>
+<input class="target" name="knave" placeholder="k" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈnāv</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/k/knave001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">无足轻重的人，小人物</label>
+<input class="target" name="
+                                  pipsqueak not found 
+                                 " placeholder="
+" type="text"/>
+</div>
+<div class="main-container page-item">
+<label for="username">塞舌尔（印度洋上的群岛国家）</label>
+<input class="target" name="Seychelles" placeholder="S" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">sā-ˈshel(z)</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/gg/ggseyc01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">使改变（宗教、政治信仰或生活方式）</label>
+<input class="target" name="proselytise" placeholder="p" type="text"/>
+</div>
+<div class="main-container page-item">
+<label for="username">（供科学实验或教育用的）植物园</label>
+<input class="target" name="arboretum" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌär-bə-ˈrē-təm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/arbore06.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（地方常因缺钱）极其肮脏的，污秽的</label>
+<input class="target" name="squalid" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈskwä-ləd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/squali01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">愚蠢;无聊;无意义;蠢事</label>
+<input class="target" name="inanity" placeholder="i" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">i-ˈna-nə-tē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/inanit02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">热油（或奶酪）火锅</label>
+<input class="target" name="fondue" placeholder="f" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">fän-ˈdü</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fondue01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">摇摇欲坠的；东倒西歪的；要散架的</label>
+<input class="target" name="ramshackle" placeholder="r" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈram-ˌsha-kəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/ramsha01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">腐尸;腐肉</label>
+<input class="target" name="carrion" placeholder="c" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈker-ē-ən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/carrio01.mp3"></audio>
+</div>
+</div>
+
+</body>
