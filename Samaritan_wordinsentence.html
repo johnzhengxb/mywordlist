@@ -1,47 +1,48 @@
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>My Wordlist</title>
-<style class="audio-player">
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>My Wordlist</title>
+  <style class="audio-player">
+    html,
+    body {
 
-   html, body {
-        
-        height: 100%; /* Locks height to the viewport */
-        background-color: transparent !important;
-        }
+      height: 100%;
+      /* Locks height to the viewport */
+      background-color: transparent !important;
+    }
 
     .audio-card {
-            display:block;
-            width: 400px;
-            margin:12px 0px;
-            margin-bottom: 2px;
-            padding:0px 0px;
-            }
+      display: block;
+      width: 400px;
+      margin: 12px 0px;
+      margin-bottom: 2px;
+      padding: 0px 0px;
+    }
 
     button.custom-play-btn {
-                height: 40px;
-                background-color: #0c427b;
-                color: white;
-                width: 100%;
-                border: none;
-                border-radius: 10px;
-                padding: 4px 4px;
-                font-size: 1rem;
-                font-weight: 500;
-                cursor: pointer;
-                transition: background-color 0.2s ease;
-        }
+      height: 40px;
+      background-color: #0c427b;
+      color: white;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 4px 4px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
 
-        .custom-play-btn:hover {
-            background-color: #0056b3;
-        }
+    .custom-play-btn:hover {
+      background-color: #0056b3;
+    }
 
-        span.pr {
-            display:none;
-        }
-</style>
-<script class="Audio-player">
-   document.addEventListener('DOMContentLoaded', () => {
+    span.pr {
+      display: none;
+    }
+  </style>
+  <script class="Audio-player">
+    document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.audio-card').forEach(card => {
         const audio = card.querySelector('audio');
         const btn = card.querySelector('.custom-play-btn');
@@ -56,7 +57,7 @@
             audio.play().catch(error => {
               console.log("Playback failed:", error);
             });
-            btn.getElementsByClassName("pr")[0].style.display="inline";
+            btn.getElementsByClassName("pr")[0].style.display = "inline";
           } else {
             audio.pause();
             // btn.textContent = '▶ Play';
@@ -69,8 +70,8 @@
         });
       });
     });
-</script>
-<style class="dustbin">
+  </script>
+  <style class="dustbin">
     footer {
 
       width: 500px;
@@ -110,8 +111,8 @@
     .close-btn:hover {
       background-color: #cc0000;
     }
-</style>
-<style class="TextInput">
+  </style>
+  <style class="TextInput">
     input[type="text"] {
       display: block;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
@@ -153,7 +154,7 @@
       color: #94a3b8;
     }
   </style>
-<style>
+  <style>
     body {
       font-family: "Microsoft Yahei";
       width: 480px;
@@ -195,15 +196,15 @@
       border-radius: 8px;
     }
   </style>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
     $(document).ready(function () {
       $("span.mwtwi").click(function () {
         $(this).toggleClass("show")
       });
     });
   </script>
-<script class="checkSpelling">
+  <script class="checkSpelling">
     document.addEventListener("DOMContentLoaded", () => {
       // Select all inputs once and loop through them
       document.querySelectorAll('input').forEach(inputField => {
@@ -248,7 +249,7 @@
       });
     });
   </script>
-<script class="dustbin">
+  <script class="dustbin">
     window.onload = function () {
       // 1. Initialize noshowlist using 'let' so it can be reassigned
       let noshowlist = [];
@@ -312,28 +313,28 @@
             btn.innerText = "+";
           } else {
             // Move back to main shelf and remove from noshowlist
-            
-            visibledivs=displayshelf.querySelectorAll("div.main-item")
-            if (visibledivs.length==0){
+
+            visibledivs = displayshelf.querySelectorAll("div.main-item")
+            if (visibledivs.length == 0) {
               console.log("visibledivs.length==0")
               displayshelf.appendChild(mainitemDiv);
-            }else{
-              target_id=mainitemDiv.dataset.id;
+            } else {
+              target_id = mainitemDiv.dataset.id;
               console.log(target_id)
               for (let i = 0; i < visibledivs.length; i++) {
-                  const currentItem = visibledivs[i];
-                  // Get the value of the data-id attribute (e.g., data-id="006")
-                  const dataId = currentItem.dataset.id;
+                const currentItem = visibledivs[i];
+                // Get the value of the data-id attribute (e.g., data-id="006")
+                const dataId = currentItem.dataset.id;
 
-                  // Compare dataId with target_id
-                  if (dataId > target_id) {
-                    console.log("move before")
-                    currentItem.before(mainitemDiv);
-                    break
-                  }
+                // Compare dataId with target_id
+                if (dataId > target_id) {
+                  console.log("move before")
+                  currentItem.before(mainitemDiv);
+                  break
+                }
               }
             }
-            
+
             noshowlist = noshowlist.filter(item => item !== egtext);
             localStorage.setItem("noshowlist", JSON.stringify(noshowlist));
             btn.innerText = "×";
@@ -367,49 +368,52 @@
     }
   </script>
 </head>
-<body>
-<main>
-<div class="main-item" data-id="001">
-<span class="dtText">a dish that consists of small pieces of food (such as meat or fruit) cooked in or dipped into a hot liquid</span>
-<span class="ex-sent first-child t no-aq sents">beef <span class="mwtwi">fondue</span></span>
-<input name="fondue" type="text"/>
-<div class="audio-card f">
-<button class="custom-play-btn" type="button">
-<span>🔊</span>
-<span class="pr fullwidth">fän-ˈdü</span>
-</button>
-<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fondue01.mp3"></audio>
-</div>
-</div>
-<div class="main-item" data-id="002">
-<span class="dtText">carelessly or loosely constructed</span>
-<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">ramshackle</span> plot</span>
-<input name="ramshackle" type="text"/>
-<div class="audio-card f">
-<button class="custom-play-btn" type="button">
-<span>🔊</span>
-<span class="pr fullwidth">ˈram-ˌsha-kəl</span>
-</button>
-<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/ramsha01.mp3"></audio>
-</div>
-</div>
-<div class="main-item" data-id="003">
-<span class="dtText">dead and putrefying flesh</span>
-<span class="ex-sent first-child t no-aq sents">Vultures live chiefly on <span class="mwtwi">carrion</span>.</span>
-<input name="carrion" type="text"/>
-<div class="audio-card f">
-<button class="custom-play-btn" type="button">
-<span>🔊</span>
-<span class="pr fullwidth">ˈker-ē-ən</span>
-</button>
-<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/carrio01.mp3"></audio>
-</div>
-</div>
 
-</main>
-<div id="controlpanel">
-<button id="ShowHideDustbin" onclick="showhidedustbin()">Show Dustbin</button>
-</div>
-<footer>
-</footer>
+<body>
+  <main>
+    <div class="main-item" data-id="001">
+      <span class="dtText">a dish that consists of small pieces of food (such as meat or fruit) cooked in or dipped into
+        a hot liquid</span>
+      <span class="ex-sent first-child t no-aq sents">beef <span class="mwtwi">fondue</span></span>
+      <input name="fondue" type="text" />
+      <div class="audio-card f">
+        <button class="custom-play-btn" type="button">
+          <span>🔊</span>
+          <span class="pr fullwidth">fän-ˈdü</span>
+        </button>
+        <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fondue01.mp3"></audio>
+      </div>
+    </div>
+    <div class="main-item" data-id="002">
+      <span class="dtText">carelessly or loosely constructed</span>
+      <span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">ramshackle</span> plot</span>
+      <input name="ramshackle" type="text" />
+      <div class="audio-card f">
+        <button class="custom-play-btn" type="button">
+          <span>🔊</span>
+          <span class="pr fullwidth">ˈram-ˌsha-kəl</span>
+        </button>
+        <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/ramsha01.mp3"></audio>
+      </div>
+    </div>
+    <div class="main-item" data-id="003">
+      <span class="dtText">dead and putrefying flesh</span>
+      <span class="ex-sent first-child t no-aq sents">Vultures live chiefly on <span
+          class="mwtwi">carrion</span>.</span>
+      <input name="carrion" type="text" />
+      <div class="audio-card f">
+        <button class="custom-play-btn" type="button">
+          <span>🔊</span>
+          <span class="pr fullwidth">ˈker-ē-ən</span>
+        </button>
+        <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/carrio01.mp3"></audio>
+      </div>
+    </div>
+
+  </main>
+  <div id="controlpanel">
+    <button id="ShowHideDustbin" onclick="showhidedustbin()">Show Dustbin</button>
+  </div>
+  <footer>
+  </footer>
 </body>
