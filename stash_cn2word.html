@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 440px;
+            margin:12px 12px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="TextInput">
+        /* Select the text box */
+        div.page-item {
+            width: 400px;
+        }
+
+        label[for="username"] {
+            border-radius:8px;
+            display:block;
+            width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            overflow-wrap: normal;
+            background-color: beige;
+        }
+
+        hr {
+            margin-right: 12px;
+            margin-left:12px;
+            width: 440px;
+        }
+
+        input[type="text"] {
+            display:block;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            width: 100%;
+            max-width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1; /* Soft gray border */
+            border-radius: 8px;        /* Modern rounded corners */
+            outline: none;
+            transition: all 0.15s ease-in-out; /* Smooth transition for focus effects */
+        }
+
+        input.correct {
+            background-color: aquamarine;
+            transition:none;
+        }
+        /* Modern focus state (glow/border color change) */
+        input[type="text"]:focus {
+            border-color: #3b82f6;     /* Vibrant modern blue */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Soft outer glow */
+        }
+
+        /* Placeholder styling */
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+</style>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all inputs once and loop through them
+        document.querySelectorAll('input').forEach(inputField => {
+            inputField.addEventListener('input', (event) => {
+                const field = event.target;
+                // Compare value to name and toggle the "correct" class
+                const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (field.value.toLowerCase() ===cleanWord.toLowerCase()) {
+                    field.classList.add("correct");
+                    field.value=field.name
+                } else {
+                    field.classList.remove("correct");
+                }
+            });
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    // Collect all input elements into an array for easy index tracking
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+            // Check if the pressed key is "Enter"
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault(); 
+                inputField.value=inputField.name
+                inputField.classList.add("correct")
+            }else{
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents accidental form submission
+                // Find the next input in the array and focus it
+                const nextInput = inputs[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+            }
+
+
+        });
+    });
+
+
+    });
+</script>
+</head>
+<body>
+<div class="main-container page-item">
+<label for="username">存放，藏匿（尤指大量物品）</label>
+<input class="target" name="stash" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈstash</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/stash001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">前导;领头者</label>
+<input class="target" name="bellwether" placeholder="b" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈbel-ˈwe-t͟hər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/bellwe01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（传说中与睡梦中的男子交媾的）女淫妖</label>
+<input class="target" name="succubus" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈsə-kyə-bəs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/succub03.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">梦淫妖（传说趁女人在睡梦中与之交合的妖魔）</label>
+<input class="target" name="incubus" placeholder="i" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈiŋ-kyə-bəs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/incubu01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（旗帜等上的）X字形十字</label>
+<input class="target" name="saltire" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈsȯl-ˌtī(-ə)r</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/saltir01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（奶牛、绵羊或其他动物的）乳房，乳腺</label>
+<input class="target" name="udder" placeholder="u" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈə-dər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/u/udder001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">事事都能赚大钱的本领</label>
+<input class="target" name="Midas" placeholder="M" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmī-dəs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/midas001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">无味的;无特色的;无生气的;乏味的</label>
+<input class="target" name="insipid" placeholder="i" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">in-ˈsi-pəd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/insipi01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">由颗粒构成；颗粒状；含颗粒</label>
+<input class="target" name="granularity" placeholder="g" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgran-yə-lər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/granul01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">钨</label>
+<input class="target" name="tungsten" placeholder="t" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtəŋ-stən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tungst02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（化学元素）铋</label>
+<input class="target" name="bismuth" placeholder="b" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈbiz-məth</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/bismut01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">钼</label>
+<input class="target" name="molybdenum" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">mə-ˈlib-də-nəm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/molybd03.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">大火，大火灾</label>
+<input class="target" name="conflagration" placeholder="c" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌkän-flə-ˈgrā-shən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/confla02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（尤指狗）龇牙低吼;（人）咆哮，吼叫</label>
+<input class="target" name="snarl" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈsnär(-ə)l</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/snarl001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">有关（基督教等宗教）礼拜仪式的</label>
+<input class="target" name="liturgical" placeholder="l" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">lə-ˈtər-ji-kəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/l/liturg01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">敏捷;欣然</label>
+<input class="target" name="alacrity" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ə-ˈla-krə-tē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/alacri01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（象征君主权位的）权杖</label>
+<input class="target" name="sceptre" placeholder="s" type="text"/>
+</div>
+<div class="main-container page-item">
+<label for="username">极不寻常的;只有少数人（尤指内行）才懂的;限于小圈子的</label>
+<input class="target" name="esoteric" placeholder="e" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div>
+</body>

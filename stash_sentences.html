@@ -1,0 +1,550 @@
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Wordlist</title>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 400px;
+            margin:12px 0px;
+            margin-bottom: 2px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 4px 4px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="dustbin">
+    footer {
+
+      width: 500px;
+      display: none;
+    }
+
+    footer.active {
+      display: block;
+    }
+
+    /* 1. Make sure the div is positioned relative so children can absolute-position inside it */
+    .main-item {
+      position: relative;
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      min-height: 80px;
+    }
+
+    /* 2. Style and position the close button at the bottom-right corner */
+    .close-btn {
+      position: absolute;
+      bottom: 15px;
+      right: 10px;
+      font-size: 0.5rem;
+      background-color: #9d97a1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      height: 30px;
+    }
+
+    .close-btn:hover {
+      background-color: #cc0000;
+    }
+</style>
+<style class="TextInput">
+    input[type="text"] {
+      display: block;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+      ;
+      width: 100%;
+      max-width: 400px;
+
+      padding: 4px 4px;
+      padding-bottom: 6px;
+      padding-left: 0.5rem;
+      font-size: 1.5rem;
+      font-family: inherit;
+      color: #1e293b;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      /* Soft gray border */
+      border-radius: 8px;
+      /* Modern rounded corners */
+      outline: none;
+      transition: all 0.15s ease-in-out;
+      /* Smooth transition for focus effects */
+    }
+
+    input.correct {
+      background-color: aquamarine;
+      transition: none;
+    }
+
+    /* Modern focus state (glow/border color change) */
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+      /* Vibrant modern blue */
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+      /* Soft outer glow */
+    }
+
+    /* Placeholder styling */
+    input[type="text"]::placeholder {
+      color: #94a3b8;
+    }
+  </style>
+<style>
+    body {
+      font-family: "Microsoft Yahei";
+      width: 480px;
+    }
+
+    span.ex-sent {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    span.dtText::before {
+      content: '🔗';
+      font-size: 0.8rem
+    }
+
+    span.dtText {
+      color: darkblue;
+    }
+
+    span.mwtwi {
+      text-decoration: underline green;
+      text-underline-offset: 6px;
+      color: rgba(0, 128, 0, 0);
+      display: inline-block;
+    }
+
+    span.mwtwi.show {
+      color: rgba(0, 128, 0, 1);
+    }
+
+    span.mwtwi::first-letter {
+      color: green !important;
+    }
+
+    div.main-item {
+      width: 480px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+      $("span.mwtwi").click(function () {
+        $(this).toggleClass("show")
+      });
+    });
+  </script>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+      // Select all inputs once and loop through them
+      document.querySelectorAll('input').forEach(inputField => {
+        inputField.addEventListener('input', (event) => {
+          const field = event.target;
+          // Compare value to name and toggle the "correct" class
+          const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          if (field.value.toLowerCase() === cleanWord.toLowerCase()) {
+            field.classList.add("correct");
+            field.value = field.name
+          } else {
+            field.classList.remove("correct");
+          }
+        });
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Collect all input elements into an array for easy index tracking
+      const inputs = Array.from(document.querySelectorAll('input'));
+
+      inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+          // Check if the pressed key is "Enter"
+          if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            inputField.value = inputField.name
+            inputField.classList.add("correct")
+          } else {
+            if (event.key === 'Enter') {
+              event.preventDefault(); // Prevents accidental form submission
+              // Find the next input in the array and focus it
+              const nextInput = inputs[index + 1];
+              if (nextInput) {
+                nextInput.focus();
+              }
+            }
+          }
+
+
+        });
+      });
+    });
+  </script>
+<script class="dustbin">
+    window.onload = function () {
+      // 1. Initialize noshowlist using 'let' so it can be reassigned
+      let noshowlist = [];
+      let savedNote = localStorage.getItem("noshowlist");
+
+      if (savedNote) {
+        try {
+          noshowlist = JSON.parse(savedNote);
+        } catch (e) {
+          console.error("Failed to parse noshowlist from localStorage", e);
+        }
+      }
+
+      // 2. Select containers and all exercise/main-item divs
+      const mainItems = document.querySelectorAll('.main-item');
+      const dustbin = document.querySelector("footer");
+      const displayshelf = document.querySelector("main");
+
+      // 3. Loop through saved hidden list and move matching items to footer on load
+      noshowlist.forEach(hiddenText => {
+        mainItems.forEach(div => {
+          const targetEl = div.querySelector(".ex-sent.first-child.t.no-aq.sents");
+          if (targetEl) {
+            let egtext = targetEl.innerText;
+            egtext = egtext.replaceAll("\n", "").replace(/\s+/g, " ").trim();
+            if (egtext === hiddenText) {
+              dustbin.appendChild(div);
+            }
+          }
+        });
+      });
+
+      // 4. Attach close/restore buttons to each main-item
+      mainItems.forEach(function (mainitemDiv) {
+        const btn = document.createElement('button');
+        btn.className = "close-btn";
+
+        const targetEl = mainitemDiv.querySelector(".ex-sent.first-child.t.no-aq.sents");
+        let egtext = "";
+        if (targetEl) {
+          egtext = targetEl.innerText.replaceAll("\n", "").replace(/\s+/g, " ").trim();
+        }
+
+        // Set initial button text based on whether it's already hidden
+        if (noshowlist.includes(egtext)) {
+          btn.innerText = "+";
+        } else {
+          btn.innerText = "×";
+        }
+
+        btn.addEventListener('click', function () {
+          if (!targetEl) return;
+
+          if (btn.innerText === "×") {
+            // Move to footer and save to noshowlist
+            dustbin.appendChild(mainitemDiv);
+            if (!noshowlist.includes(egtext)) {
+              noshowlist.push(egtext);
+            }
+            localStorage.setItem("noshowlist", JSON.stringify(noshowlist));
+            btn.innerText = "+";
+          } else {
+            // Move back to main shelf and remove from noshowlist
+            
+            visibledivs=displayshelf.querySelectorAll("div.main-item")
+            if (visibledivs.length==0){
+              console.log("visibledivs.length==0")
+              displayshelf.appendChild(mainitemDiv);
+            }else{
+              target_id=mainitemDiv.dataset.id;
+              console.log(target_id)
+              for (let i = 0; i < visibledivs.length; i++) {
+                  const currentItem = visibledivs[i];
+                  // Get the value of the data-id attribute (e.g., data-id="006")
+                  const dataId = currentItem.dataset.id;
+
+                  // Compare dataId with target_id
+                  if (dataId > target_id) {
+                    console.log("move before")
+                    currentItem.before(mainitemDiv);
+                    break
+                  }
+              }
+            }
+            
+            noshowlist = noshowlist.filter(item => item !== egtext);
+            localStorage.setItem("noshowlist", JSON.stringify(noshowlist));
+            btn.innerText = "×";
+          }
+        });
+
+        // Append button inside the loop correctly
+        mainitemDiv.appendChild(btn);
+      });
+    };
+
+    function restoreall() {
+      const displayshelf = document.querySelector("main");
+      document.querySelectorAll("div.main-item").forEach(div => {
+        displayshelf.appendChild(div);
+        // Reset buttons if they exist
+        const btn = div.querySelector(".close-btn");
+        if (btn) btn.innerText = "×";
+      });
+      localStorage.removeItem("noshowlist");
+    }
+
+    function showhidedustbin() {
+      document.querySelector("footer").classList.toggle("active")
+      btt = document.getElementById('ShowHideDustbin')
+      if (btt.innerText == "Show Dustbin") {
+        btt.innerText = "Hide Dustbin";
+      } else {
+        btt.innerText = "Show Dustbin";
+      }
+    }
+  </script>
+</head>
+<body>
+<div class="main-item" data-id="001">
+<span class="dtText">lacking in qualities that interest, stimulate, or challenge <strong class="mw_t_bc">: </strong><span class="text-uppercase">dull</span>, <span class="text-uppercase">flat</span></span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">insipid</span> prose</span></span>
+<input name="insipid" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">in-ˈsi-pəd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/insipi01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="002">
+<span class="dtText">lacking taste or savor <strong class="mw_t_bc">: </strong><span class="text-uppercase">tasteless</span></span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">insipid</span> food</span></span>
+<input name="insipid" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">in-ˈsi-pəd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/insipi01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="003">
+<span class="dtText">finely detailed</span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">granular</span> reports</span></span>
+<input name="granular" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgran-yə-lər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/granul01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="004">
+<span class="dtText">a defense especially of one's opinions, position, or actions</span>
+<span class="ex-sent first-child t has-aq sents">the finest <span class="mwtwi">apologia</span> or explanation of what drives a man to devote his life to pure mathematics</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="source"> — <em class="mw_t_it">British Book News</em></span></span></span>
+<input name="apologia" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌa-pə-ˈlō-j(ē-)ə</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/apolog04.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="005">
+<span class="dtText">a large disastrous fire </span>
+<span class="ex-sent first-child t no-aq sents">The <span class="mwtwi">conflagration</span> destroyed the warehouses.    </span>
+<input name="conflagration" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌkän-flə-ˈgrā-shən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/confla02.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="006">
+<span class="dtText"><span class="text-uppercase">conflict</span>, <span class="text-uppercase">war</span></span>
+<span class="ex-sent first-child t no-aq sents">The <span class="mwtwi">conflagration</span> between the two countries lasted for ten years.</span>
+<input name="conflagration" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌkän-flə-ˈgrā-shən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/confla02.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="007">
+<span class="dtText">of, relating to, or having the characteristics of liturgy</span>
+<span class="ex-sent first-child t no-aq sents">the <span class="mwtwi">liturgical</span> calendar</span>
+<input name="liturgical" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">lə-ˈtər-ji-kəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/l/liturg01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="008">
+<span class="dtText">using or favoring the use of liturgy</span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">liturgical</span> churches</span></span>
+<input name="liturgical" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">lə-ˈtər-ji-kəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/l/liturg01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="009">
+<span class="dtText">promptness in response <strong class="mw_t_bc">: </strong>cheerful readiness</span>
+<span class="ex-sent first-child t no-aq sents">accepted the invitation with <span class="mwtwi">alacrity</span></span>
+<input name="alacrity" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ə-ˈla-krə-tē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/alacri01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="010">
+<span class="dtText">requiring or exhibiting knowledge that is restricted to a small group</span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">esoteric</span> terminology</span></span>
+<input name="esoteric" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="011">
+<span class="dtText">difficult to understand </span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">esoteric</span> subjects</span> </span>
+<input name="esoteric" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="012">
+<span class="dtText">limited to a small circle</span>
+<span class="ex-sent first-child t no-aq sents">engaging in <span class="mwtwi">esoteric</span> pursuits</span>
+<input name="esoteric" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="013">
+<span class="dtText"><span class="text-uppercase">private</span>, <span class="text-uppercase">confidential</span></span>
+<span class="ex-sent first-child t no-aq sents">an <span class="mwtwi">esoteric</span> purpose</span>
+<input name="esoteric" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="014">
+<span class="dtText">of special, rare, or unusual interest</span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">esoteric</span> building materials</span></span>
+<input name="esoteric" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="015">
+<span class="dtText">designed for or understood by the specially initiated alone</span>
+<span class="ex-sent first-child t has-aq sents">a body of <span class="mwtwi">esoteric</span> legal doctrine</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="auth">— B. N. Cardozo</span></span></span>
+<input name="esoteric" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div>
+<main>
+</main>
+<div id="controlpanel">
+<button id="ShowHideDustbin" onclick="showhidedustbin()">Show Dustbin</button>
+</div>
+<footer>
+</footer>
+</body>
