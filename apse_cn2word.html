@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 440px;
+            margin:12px 12px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="TextInput">
+        /* Select the text box */
+        div.page-item {
+            width: 400px;
+        }
+
+        label[for="username"] {
+            border-radius:8px;
+            display:block;
+            width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            overflow-wrap: normal;
+            background-color: beige;
+        }
+
+        hr {
+            margin-right: 12px;
+            margin-left:12px;
+            width: 440px;
+        }
+
+        input[type="text"] {
+            display:block;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            width: 100%;
+            max-width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1; /* Soft gray border */
+            border-radius: 8px;        /* Modern rounded corners */
+            outline: none;
+            transition: all 0.15s ease-in-out; /* Smooth transition for focus effects */
+        }
+
+        input.correct {
+            background-color: aquamarine;
+            transition:none;
+        }
+        /* Modern focus state (glow/border color change) */
+        input[type="text"]:focus {
+            border-color: #3b82f6;     /* Vibrant modern blue */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Soft outer glow */
+        }
+
+        /* Placeholder styling */
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+</style>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all inputs once and loop through them
+        document.querySelectorAll('input').forEach(inputField => {
+            inputField.addEventListener('input', (event) => {
+                const field = event.target;
+                // Compare value to name and toggle the "correct" class
+                const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (field.value.toLowerCase() ===cleanWord.toLowerCase()) {
+                    field.classList.add("correct");
+                    field.value=field.name
+                } else {
+                    field.classList.remove("correct");
+                }
+            });
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    // Collect all input elements into an array for easy index tracking
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+            // Check if the pressed key is "Enter"
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault(); 
+                inputField.value=inputField.name
+                inputField.classList.add("correct")
+            }else{
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents accidental form submission
+                // Find the next input in the array and focus it
+                const nextInput = inputs[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+            }
+
+
+        });
+    });
+
+
+    });
+</script>
+</head>
+<body>
+<div class="main-container page-item">
+<label for="username">（尤指教堂东端的）半圆形 （或多角形）拱顶附带建筑， 半圆室，半圆形殿</label>
+<input class="target" name="apse" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈaps</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/apse0001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">煤烟;煤灰</label>
+<input class="target" name="soot" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈsu̇t</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/soot0001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（有共同兴趣、常排外的）小圈子，小团体，小集团</label>
+<input class="target" name="coterie" placeholder="c" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈkō-tə-(ˌ)rē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/coteri01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">治标药物，缓解剂;治标措施，保守疗法</label>
+<input class="target" name="palliative" placeholder="p" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈpa-lē-ˌā-tiv</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/pallia07.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">时装设计师;时装销售商</label>
+<input class="target" name="couturier" placeholder="c" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">kü-ˈtu̇r-ē-ər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/coutur03.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">不受控制的;无限的</label>
+<input class="target" name="unbridled" placeholder="u" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌən-ˈbrī-dᵊld</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/u/unbrid02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">柔韧而优雅的，轻巧自如的</label>
+<input class="target" name="lithe" placeholder="l" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈlīt͟h</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/l/lithe001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">大百货商场；专卖店</label>
+<input class="target" name="emporia" placeholder="e" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">em-ˈpȯr-ē-ə</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/gg/ggempo01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">称…为，将…冠以</label>
+<input class="target" name="dub" placeholder="d" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈdəb</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/dub00001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">极不寻常的;只有少数人（尤指内行）才懂的;限于小圈子的</label>
+<input class="target" name="esoteric" placeholder="e" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-sə-ˈter-ik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/esoter01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">过度缩减开支</label>
+<input class="target" name="scrimp" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈskrimp</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/scrimp01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">砍，劈</label>
+<input class="target" name="hew" placeholder="h" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈhyü</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/h/hew00001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（发动机的）一转</label>
+<input class="target" name="rev" placeholder="r" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈrev</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rev00001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（尤指想法）模糊不清的，含糊的</label>
+<input class="target" name="nebulous" placeholder="n" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈne-byə-ləs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/n/nebulo02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">身体不适;萎靡;心神不宁;（尤指对社会的）不满，无奈</label>
+<input class="target" name="malaise" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">mə-ˈlāz</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/malais01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（药物、毒品）引起幻觉的，致幻的</label>
+<input class="target" name="psychedelic" placeholder="p" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌsī-kə-ˈde-lik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/psyche03.mp3"></audio>
+</div>
+</div>
+
+</body>

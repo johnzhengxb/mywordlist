@@ -1,0 +1,1265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <!-- Start: Style Part -->
+  <style class="Pagination">
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    div.pagination-controls {
+        width: 100% !important;
+        font-size: 1 rem !important;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        padding-right: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1000; /* Keeps it above other elements */
+     }
+
+   #prev-btn, #next-btn {
+        width: 25%;
+        height: 60px;
+        border-radius: 8px;
+        background-color: darkgreen;
+   }
+
+   #page-indicator {
+        display: inline-block;
+        padding-left: 10%;
+        text-align:center;
+        margin-left: auto;
+        margin-right: auto;
+   }
+
+   #next-btn {
+        margin-left: auto; /* 下一页按钮靠右对齐*/
+   }
+
+   .page-item {
+        display: none;  /* Hide all items by default */
+    }
+
+   .page-item.active {
+        display: block; /* Only show items belonging to the active page */
+        height: 100% !important;
+    }
+  </style>
+  <style class="Heading">
+   h1 {
+          width: 100% !important;
+          max-height: fit-content  !important;
+          padding: 2rem !important;
+          margin-bottom: 12px !important;
+          margin-top: 36px !important;
+          font-size: 3rem  !important;
+          background-color: darkgreen;
+          border-radius: 8px;
+        }
+  </style>
+  <style class="collapse-Expand">
+   details {
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            padding: 10px !important;
+            background: #012344;
+            margin-top:24px !important;
+        }
+
+        summary {
+            font-size:1rem !important;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            margin-left:12px !important;
+        }
+  </style>
+  <style class="audio-player">
+   .audio-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    margin-bottom: 12px;
+                    margin-top: 12px;
+                    padding: 1px 1px;
+                    border-radius: 12px;
+                    max-width: 100%;
+            }
+
+        .custom-play-btn {
+                height: 60px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+  </style>
+  <!-- End Style Part -->
+  <!-- Start Script Part -->
+  <script class="Pagination">
+   document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('.page-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 1;
+        const itemsPerPage = 1; // Change this to how many items you want per page
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        function showPage(page) {
+
+        if(page>totalPages){page=1};// 循环
+        currentPage = page;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        items.forEach((item, index) => {
+        if (index >= start && index < end) {
+                item.classList.add('active');
+                item.getElementsByTagName("audio")[0].play();
+        } else {
+                item.classList.remove('active');
+        }
+        });
+
+        // Update indicator and button states
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        // nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+        showPage(currentPage + 1);
+        });
+
+        // Initialize first page view
+        showPage(1);
+
+        });
+  </script>
+  <script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+  <script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.textContent = '⏸ Pause';
+          } else {
+            audio.pause();
+            btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          btn.textContent = '▶ Play';
+        });
+      });
+    });
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+  </script>
+  <script class="autocontrol">
+   $(document).ready(function() {
+    // When the HTML document has finished loading,
+    // set the opacity of all <h1> elements with class "hword" to 1 (fully visible).
+    $("h1.hword").css("opacity", "1");
+
+    // Set the opacity of all <em> elements to 1 (fully visible).
+    $("em").css("opacity", "1");
+
+    // Add a click event handler to every <h1 class="hword"> element.
+    $("h1.hword").click(function() {
+
+    // Make the clicked <h1> fully visible.
+    $(this).css("opacity", "1");
+
+    // Starting from the clicked <h1>, find its parent elements
+    // until reaching elements with class "outer-container",
+    // then find <em> elements inside those containers
+    // and make them fully visible.
+    $(this)
+        .parents(".outer-container")
+        .find("em")
+        .css("opacity", "1");
+    });
+
+
+    // Find every <div class="example_sentences">.
+    // For each one, go to its parent element and hide
+    // any <div class="on-web"> inside that parent.
+    $("div.example_sentences")
+        .parent()
+        .find("div.on-web")
+        .hide();
+
+    // Similarly, hide any <div class="in-sentences">
+    // inside the parent of each example_sentences element.
+    $("div.example_sentences")
+        .parent()
+        .find("div.in-sentences")
+        .hide();
+
+    // Add a double-click event handler to every
+    // <div class="example_sentences"> element.
+    $("div.example_sentences").dblclick(function() {
+
+        // When the example sentences are double-clicked,
+        // toggle the visibility of <div class="on-web">
+        // inside the same parent element.
+        //
+        // "toggle()" means:
+        //   visible -> hidden
+        //   hidden  -> visible
+        $(this)
+            .parent()
+            .find("div.on-web")
+            .toggle();
+
+        // Also toggle the visibility of <div class="in-sentences">
+        // inside the same parent element.
+        $(this)
+            .parent()
+            .find("div.in-sentences")
+            .toggle();
+        });
+  </script>
+  <!-- End: Script Part -->
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+  <title>
+   Emporia Definition &amp; Meaning - Merriam-Webster
+  </title>
+  <link href="/opensearch/dictionary.xml" rel="search" title="Merriam-Webster Dictionary" type="application/opensearchdescription+xml"/>
+  <link href="/favicon.svg" rel="icon"/>
+  <link color="#305f7a" href="/safari-pinned-tab.svg" rel="mask-icon"/>
+  <link href="/apple-touch-icon.png" rel="apple-touch-icon" sizes="144x144"/>
+  <link href="/site.webmanifest" rel="manifest"/>
+  <link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions.1f89efcf6947f2d77ef5.css" media="screen" rel="stylesheet"/>
+  <link as="style" href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions-defer.ad5d4ce4a1782dba8842.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
+  <style type="text/css">
+   .abl {display:none!important;}
+  </style>
+ </head>
+ <body class="no-touch definitions-page dictionary-lookup">
+  <div class="main-container page-item">
+   <div class="left-content col-lg-7 col-xl-8" id="left-content">
+    <span class="anchor-name" data-hom="1" href="#" id="g-anchor">
+    </span>
+    <div class="row entry-header">
+     <div class="col-12">
+      <h1 class="hword">
+       Emporia
+      </h1>
+      <br/>
+     </div>
+    </div>
+    <div class="row entry-attr">
+     <div class="col">
+      <span class="fl">
+       geographical name
+      </span>
+      <span class="prs">
+       <span class="first-slash">
+        \
+       </span>
+       <span class="pr">
+        em-ˈpȯr-ē-ə
+       </span>
+       <span class="last-slash">
+        \
+       </span>
+      </span>
+      <div class="audio-card">
+       <button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+       <audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/gg/ggempo01.mp3">
+       </audio>
+      </div>
+     </div>
+    </div>
+    <details>
+     <summary>
+      Click for Explanations
+     </summary>
+     <div class="DictionaryEntries">
+      <div id="dictionary-entry-1">
+       <div class="row vg-header">
+        <div class="col">
+         <h2 class="">
+          Definition of
+          <em>
+           Emporia
+          </em>
+         </h2>
+         <p class="entryNumbers">
+         </p>
+        </div>
+       </div>
+       <div class="vg">
+        <div class="sb no-sn">
+         <span class="sb-0">
+          <div class="sense no-subnum">
+           <span class="dt">
+            <span class="dtText">
+             city southwest of Topeka in east central Kansas
+             <em class="mw_t_it">
+              population
+             </em>
+             24,916
+            </span>
+           </span>
+          </div>
+         </span>
+        </div>
+       </div>
+      </div>
+      <div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+      </div>
+      <div class="widget learn_more">
+      </div>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+      <br/>
+     </div>
+    </details>
+   </div>
+  </div>
+ </body>
+ <div class="pagination-controls col-lg-7 col-xl-8 left-content">
+  <button id="prev-btn" type="button">
+   ◀ Previous
+  </button>
+  <span id="page-indicator">
+   Page 1 of 3
+  </span>
+  <button id="next-btn" type="button">
+   Next ▶
+  </button>
+ </div>
+
+<body class="no-touch definitions-page dictionary-lookup">
+<div class="main-container page-item">
+<div class="left-content col-lg-7 col-xl-8" id="left-content">
+<span class="anchor-name ga-track-hom" data-hom="1" href="#" id="h1-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<h1 class="hword">
+       dub
+      </h1>
+<br/>
+</div>
+</div>
+<div class="row entry-attr">
+<div class="col">
+<span class="fl">
+<a class="important-blue-link" href="">
+        verb (1)
+       </a>
+</span>
+<span class="prs">
+<span class="first-slash">
+        \
+       </span>
+<span class="pr">
+        ˈdəb
+       </span>
+<span class="last-slash">
+        \
+       </span>
+</span>
+<div class="audio-card">
+<button class="custom-play-btn" type="button">
+        ▶ Play
+       </button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/dub00001.mp3">
+</audio>
+</div>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="if">
+        dubbed
+       </span>
+<span class="sep-semicolon">
+        ;
+       </span>
+<span class="if">
+        dubbing
+       </span>
+</span>
+</div>
+</div>
+<details>
+<summary>
+      Click for Explanations
+     </summary>
+<div class="DictionaryEntries">
+<div id="dictionary-entry-1">
+<div class="row vg-header">
+<div class="col">
+<h2 class="">
+          Definition of
+          <em>
+           dub
+          </em>
+</h2>
+<p class="entryNumbers">
+          (Entry 1 of 5)
+         </p>
+</div>
+</div>
+<div class="vg">
+<p class="vd firstVd">
+<a class="important-blue-link" href="">
+          transitive verb
+         </a>
+</p>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-1 a">
+<span class="num">
+             1
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to confer
+             <a class="mw_t_d_link" href="/dictionary/knighthood">
+              knighthood
+             </a>
+             on
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             was
+             <em class="mw_t_it">
+              dubbed
+             </em>
+             Sir Philip
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to call by a distinctive title,
+             <a class="mw_t_d_link" href="/dictionary/epithet">
+              epithet
+             </a>
+             , or nickname
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             Critics have
+             <em class="mw_t_it">
+              dubbed
+             </em>
+             him the new king of rock 'n' roll.
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to trim or remove the comb (see
+             <a class="mw_t_dxt" href="/dictionary/comb#h1">
+<span class="text-uppercase">
+               comb
+              </span>
+<span class="text-lowercase">
+               entry
+              </span>
+              1
+              <span class="text-lowercase">
+               sense 2a
+              </span>
+</a>
+             ) and
+             <a class="mw_t_d_link" href="/dictionary/wattle#h3">
+              wattles
+             </a>
+             of
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num has-let">
+<span class="sb-0">
+<div class="sense has-sn">
+<span class="sn sense-3 a">
+<span class="num">
+             3
+            </span>
+<span class="letter">
+             a
+            </span>
+</span>
+<span class="sl">
+            golf
+           </span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to hit (a ball or shot) poorly
+            </span>
+</span>
+</div>
+</span>
+<span class="sb-1">
+<div class="sense has-sn">
+<span class="sn sense-b">
+<span class="letter">
+             b
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to execute poorly
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             a
+             <em class="mw_t_it">
+              dubbed
+             </em>
+             attempt
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<div class="main main--10rAd" data-role="content-main">
+<div class="ant-row-flex ant-row-flex-space-around">
+<div class="ant-col-xs-24 ant-col-sm-24 ant-col-md-24 ant-col-lg-17">
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<h2 class="word__name--TTbAA" style="margin-top:0.5em" title="Origin and meaning of dub">
+              Online Etymolgy for dub
+              <!-- -->
+<!-- -->
+              (v.1)
+             </h2>
+<section class="word__defination--2q7ZH">
+<p>
+               "give a name to," originally "make a knight," from late Old English
+               <span class="foreign notranslate">
+                dubbian
+               </span>
+               "knight by ceremonially striking with a sword" (11c.), a word perhaps borrowed from Old French
+               <span class="foreign notranslate">
+                aduber
+               </span>
+               "equip with arms, adorn" (11c.) which is of uncertain origin, probably Germanic, but there are phonetic difficulties. Meaning "provided with a name" is from 1590s. Related:
+               <span class="foreign notranslate">
+                Dubbed
+               </span>
+               ;
+               <span class="foreign notranslate">
+                dubbing
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:11c.">
+               11c.
+              </a>
+</div>
+</div>
+</div>
+</div>
+<div class="word--C9UPa">
+<div>
+<div class="" style="position:relative">
+<div id="etymonline_v_15946" style="position:absolute;top:-100px">
+</div>
+<p class="word__name--TTbAA" title="Origin and meaning of dub">
+              dub
+              <!-- -->
+<!-- -->
+              (v.2)
+             </p>
+<section class="word__defination--2q7ZH">
+<p>
+               "add or alter sound on film," 1929, shortening of
+               <a class="crossreference notranslate" href="/word/double#etymonline_v_45759" title="Etymology, meaning and definition of double ">
+                double
+               </a>
+               (v.); so called because it involves making an additional recording of voices and combining it with the soundtrack. The type of re-mixed reggae music was so called from 1974, probably for the same reason. Related:
+               <span class="foreign notranslate">
+                Dubbed
+               </span>
+               ;
+               <span class="foreign notranslate">
+                dubbing
+               </span>
+               .
+              </p>
+</section>
+<div class="word__firstRecorded--3lZB8" style="font-size:18px;">
+              also from
+              <!-- -->
+<a class="word__firstRecorded_time--28qNE" href="/search?sort=a&amp;q=from:1929">
+               1929
+              </a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="2" href="#" id="h2-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         dub
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          noun (1)
+         </a>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-2">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           dub
+          </em>
+          (Entry 2 of 5)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             one who is
+             <a class="mw_t_d_link" href="/dictionary/inept">
+              inept
+             </a>
+             or clumsy
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="3" href="#" id="h3-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         dub
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          noun (2)
+         </a>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-3">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           dub
+          </em>
+          (Entry 3 of 5)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sls">
+<span class="sl">
+          chiefly Scotland
+         </span>
+</div>
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+<a class="mw_t_sx" href="/dictionary/pool">
+<span class="text-uppercase">
+               pool
+              </span>
+</a>
+             ,
+             <a class="mw_t_sx" href="/dictionary/puddle">
+<span class="text-uppercase">
+               puddle
+              </span>
+</a>
+</span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="4" href="#" id="h4-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         dub
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          verb (2)
+         </a>
+</span>
+</div>
+</div>
+<div class="row headword-row">
+<div class="col">
+<span class="vg-ins">
+<span class="if">
+          dubbed
+         </span>
+<span class="sep-semicolon">
+          ;
+         </span>
+<span class="if">
+          dubbing
+         </span>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-4">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           dub
+          </em>
+          (Entry 4 of 5)
+         </p>
+</div>
+</div>
+<div class="vg">
+<p class="vd firstVd">
+<a class="important-blue-link" href="">
+          transitive verb
+         </a>
+</p>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-1">
+<span class="num">
+             1
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to add (
+             <a class="mw_t_d_link" href="/dictionary/sound effects">
+              sound effects
+             </a>
+             or new dialogue) to a film or to a radio or television production
+            </span>
+<span class="uns">
+<span class="un">
+<span class="mdash">
+               —
+              </span>
+<span class="unText">
+               usually used with
+               <em class="mw_t_it">
+                in
+               </em>
+</span>
+<span class="vis">
+<span class="vi">
+<span class="ex-sent first-child t no-aq sents">
+                 They
+                 <em class="mw_t_it">
+                  dubbed
+                 </em>
+                 in the music.
+                </span>
+</span>
+</span>
+</span>
+</span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-2">
+<span class="num">
+             2
+            </span>
+</span>
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to provide (a motion-picture film) with a new
+             <a class="mw_t_d_link" href="/dictionary/soundtrack">
+              soundtrack
+             </a>
+             and especially dialogue in a different language
+            </span>
+<span class="ex-sent first-child t no-aq sents">
+             The film was
+             <em class="mw_t_it">
+              dubbed
+             </em>
+             in French and Spanish.
+            </span>
+</span>
+</div>
+</span>
+</div>
+<div class="sb has-num">
+<span class="sb-0">
+<div class="sense has-num-only">
+<span class="sn sense-3">
+<span class="num">
+             3
+            </span>
+</span>
+<span class="dt hasSdSense">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to make a new recording of (sound or videotape already recorded)
+            </span>
+</span>
+<span class="sdsense">
+<span class="sd">
+             also
+            </span>
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             to mix (recorded sound or videotape from different sources) into a single recording
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span class="anchor-name anchor-spacer ga-track-hom" data-hom="5" href="#" id="h5-anchor">
+</span>
+<div class="row entry-header">
+<div class="col-12">
+<p class="hword">
+         dub
+        </p>
+<span class="fl">
+<a class="important-blue-link" href="">
+          noun (3)
+         </a>
+</span>
+</div>
+</div>
+<div id="dictionary-entry-5">
+<div class="row vg-header">
+<div class="col">
+<p class="hword2">
+          Definition of
+          <em>
+           dub
+          </em>
+          (Entry 5 of 5)
+         </p>
+</div>
+</div>
+<div class="vg">
+<div class="sb no-sn">
+<span class="sb-0">
+<div class="sense no-subnum">
+<span class="dt">
+<span class="dtText">
+<strong class="mw_t_bc">
+              :
+             </strong>
+             Jamaican music in which audio effects and spoken or chanted words are imposed on an instrumental
+             <a class="mw_t_d_link" href="/dictionary/reggae">
+              reggae
+             </a>
+             background
+            </span>
+</span>
+</div>
+</span>
+</div>
+</div>
+</div>
+<span id="anchor-seporator">
+</span>
+<div class="widget synonyms_list thesaurus-synonyms-module-anchor" id="synonyms-anchor">
+<h2>
+        Synonyms for
+        <em>
+         dub
+        </em>
+</h2>
+<p class="function-label">
+        Synonyms: Verb (1)
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/baptize">
+          baptize
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/call">
+          call
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/christen">
+          christen
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/clepe">
+          clepe
+         </a>
+</li>
+<li>
+         [
+         <span class="wsls">
+          archaic
+         </span>
+         ]
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/denominate">
+          denominate
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/designate">
+          designate
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/entitle">
+          entitle
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/label">
+          label
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/name">
+          name
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/nominate">
+          nominate
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/style">
+          style
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/term">
+          term
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/title">
+          title
+         </a>
+</li>
+</ul>
+<p class="function-label">
+        Synonyms: Noun (1)
+       </p>
+<ul class="mw-list">
+<li>
+<a class="" href="/dictionary/butterfingers">
+          butterfingers
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/klutz">
+          klutz
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/looby">
+          looby
+         </a>
+         ,
+        </li>
+<li>
+<a class="" href="/dictionary/lubber">
+          lubber
+         </a>
+         ,
+        </li>
+<li>
+<a class="syn-last" href="/dictionary/lummox">
+          lummox
+         </a>
+</li>
+</ul>
+</div>
+<div class="widget firstknown-list" id="first-known-anchor">
+<h2>
+        First Known Use of
+        <em>
+         dub
+        </em>
+</h2>
+<p class="function-label">
+        Verb (1)
+       </p>
+<p class="ety-sl" data-entry-id="1">
+        before the 12th century, in the meaning defined at
+        <a href="#h1">
+         sense 1a
+        </a>
+</p>
+<p class="function-label">
+        Noun (1)
+       </p>
+<p class="ety-sl" data-entry-id="2">
+        1884, in the meaning defined
+        <a href="#h2">
+         above
+        </a>
+</p>
+<p class="function-label">
+        Noun (2)
+       </p>
+<p class="ety-sl" data-entry-id="3">
+        15th century, in the meaning defined
+        <a href="#h3">
+         above
+        </a>
+</p>
+<p class="function-label">
+        Verb (2)
+       </p>
+<p class="ety-sl" data-entry-id="4">
+        1930, in the meaning defined at
+        <a href="#h4">
+         sense 1
+        </a>
+</p>
+<p class="function-label">
+        Noun (3)
+       </p>
+<p class="ety-sl" data-entry-id="5">
+        1974, in the meaning defined
+        <a href="#h5">
+         above
+        </a>
+</p>
+</div>
+<div class="widget etymology-list" id="etymology-anchor">
+<h2>
+        History and Etymology for
+        <em>
+         dub
+        </em>
+</h2>
+<p class="function-label">
+        Verb (1) and Noun (1)
+       </p>
+<p class="et">
+        Middle English
+        <em class="mw_t_it">
+         dubben
+        </em>
+        , from Old English
+        <em class="mw_t_it">
+         dubbian
+        </em>
+        ; akin to Old Norse
+        <em class="mw_t_it">
+         dubba
+        </em>
+        to dub, Old High German
+        <em class="mw_t_it">
+         tubili
+        </em>
+        plug
+       </p>
+<p class="function-label">
+        Noun (2)
+       </p>
+<p class="et">
+        Middle English (Scots)
+        <em class="mw_t_it">
+         dubbe
+        </em>
+</p>
+<p class="function-label">
+        Verb (2)
+       </p>
+<p class="et">
+        by shortening &amp; alteration from
+        <em class="mw_t_it">
+         double
+        </em>
+</p>
+</div>
+<div class="heavy-break learn-more-module-anchor" id="learn-more-anchor" style="height:2px;margin:8px 0 10px">
+</div>
+<div class="widget learn_more">
+</div>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+</div>
+</details>
+</div>
+</div>
+</body></html>
