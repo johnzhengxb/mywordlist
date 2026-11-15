@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 440px;
+            margin:12px 12px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="TextInput">
+        /* Select the text box */
+        div.page-item {
+            width: 400px;
+        }
+
+        label[for="username"] {
+            border-radius:8px;
+            display:block;
+            width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            overflow-wrap: normal;
+            background-color: beige;
+        }
+
+        hr {
+            margin-right: 12px;
+            margin-left:12px;
+            width: 440px;
+        }
+
+        input[type="text"] {
+            display:block;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            width: 100%;
+            max-width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1; /* Soft gray border */
+            border-radius: 8px;        /* Modern rounded corners */
+            outline: none;
+            transition: all 0.15s ease-in-out; /* Smooth transition for focus effects */
+        }
+
+        input.correct {
+            background-color: aquamarine;
+            transition:none;
+        }
+        /* Modern focus state (glow/border color change) */
+        input[type="text"]:focus {
+            border-color: #3b82f6;     /* Vibrant modern blue */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Soft outer glow */
+        }
+
+        /* Placeholder styling */
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+</style>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all inputs once and loop through them
+        document.querySelectorAll('input').forEach(inputField => {
+            inputField.addEventListener('input', (event) => {
+                const field = event.target;
+                // Compare value to name and toggle the "correct" class
+                const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (field.value.toLowerCase() ===cleanWord.toLowerCase()) {
+                    field.classList.add("correct");
+                    field.value=field.name
+                } else {
+                    field.classList.remove("correct");
+                }
+            });
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    // Collect all input elements into an array for easy index tracking
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+            // Check if the pressed key is "Enter"
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault(); 
+                inputField.value=inputField.name
+                inputField.classList.add("correct")
+            }else{
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents accidental form submission
+                // Find the next input in the array and focus it
+                const nextInput = inputs[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+            }
+
+
+        });
+    });
+
+
+    });
+</script>
+</head>
+<body>
+<div class="main-container page-item">
+<label for="username">（古希腊数学家、科学家）阿基米德</label>
+<input class="target" name="Archimedes" placeholder="A" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌär-kə-ˈmē-dēz</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/bix/bixarc02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">剧变；大灾难；大变动</label>
+<input class="target" name="cataclysm" placeholder="c" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈka-tə-ˌkli-zəm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/catacl01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">典范；最完美的榜样；极致</label>
+<input class="target" name="apotheosis" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ə-ˌpä-thē-ˈō-səs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/apothe09.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">政变;起义;暴动</label>
+<input class="target" name="putsch" placeholder="p" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈpu̇ch</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/putsch01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">恼怒的，生气的</label>
+<input class="target" name="peeved" placeholder="p" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈpēv</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/peeve001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">分泌唾液;流口水</label>
+<input class="target" name="salivate" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈsa-lə-ˌvāt</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/saliva03.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（国家或组织的）权力空白期，空位期</label>
+<input class="target" name="interregnum" placeholder="i" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌin-tə-ˈreg-nəm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/interr03.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">三次</label>
+<input class="target" name="thrice" placeholder="t" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈthrīs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/thrice01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（通常指人的外表或行为）冷峻的，阴沉的，不苟言笑的</label>
+<input class="target" name="dour" placeholder="d" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈdau̇(-ə)r</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/dour0002.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">预知的，有预知能力的，有先见之明的</label>
+<input class="target" name="prescient" placeholder="p" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈpre-sh(ē-)ən(t)s</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/presci01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">出丑；失礼；失言</label>
+<input class="target" name="gaffe" placeholder="g" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgaf</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/gaffe001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">蹦床（一种体育器械）</label>
+<input class="target" name="trampoline" placeholder="t" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌtram-pə-ˈlēn</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/trampo01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（金属）钒</label>
+<input class="target" name="Vanadium" placeholder="V" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">və-ˈnā-dē-əm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/v/vanadi01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">扬，簸（谷物）</label>
+<input class="target" name="winnow" placeholder="w" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈwi-(ˌ)nō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/w/winnow01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（尤指女性由于害怕变胖而引起的）厌食（症）;食欲缺乏</label>
+<input class="target" name="Anorexia" placeholder="A" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌa-nə-ˈrek-sē-ə</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/anorex01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（drive 的过去式）</label>
+<input class="target" name="drove" placeholder="d" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈdrōv</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/drove001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">乡土爵士乐</label>
+<input class="target" name="funk" placeholder="f" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfəŋk</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/funk0001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（特定地区的）居民，常住者，动物，植物</label>
+<input class="target" name="denizen" placeholder="d" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈde-nə-zən</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/denize01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">凸出于…之上;悬于…之上;悬垂，悬挂</label>
+<input class="target" name="overhang" placeholder="o" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈō-vər-ˌhaŋ</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/o/overha03.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（产于中亚一带的）双峰骆驼</label>
+<input class="target" name="Bactrian" placeholder="B" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈbak-trē-ə</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/gg/ggbact01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">卡利普索民歌（流行于加勒比，歌词常在演唱时即兴而作，通常以当前发生的事情为主题）</label>
+<input class="target" name="Calypso" placeholder="C" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">kə-ˈlip-(ˌ)sō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/calyps01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">接近身体中央的;近（骨或肌肉）端的</label>
+<input class="target" name="proximal" placeholder="p" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈpräk-sə-məl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/proxim01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">远侧的，远中的</label>
+<input class="target" name="distal" placeholder="d" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈdi-stᵊl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/d/distal01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">传讯，控辩诉讼程序</label>
+<input class="target" name="arraignment" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ə-ˈrān</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/arraig01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">天意，天道，天命</label>
+<input class="target" name="Providence" placeholder="P" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈprä-və-dən(t)s</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/p/provid02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">酷爱…者;…迷</label>
+<input class="target" name="aficionado" placeholder="a" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ə-ˌfi-sh(ē-)ə-ˈnä-(ˌ)dō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/a/aficio02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">使衰弱；使效力减弱</label>
+<input class="target" name="Emasculate" placeholder="E" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">i-ˈma-skyə-ˌlāt</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/emascu01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">巧妙安排;谋划，策划</label>
+<input class="target" name="Contrive" placeholder="C" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">kən-ˈtrīv</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/contri09.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">獴</label>
+<input class="target" name="Mongoose" placeholder="M" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmän-ˌgüs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mongoo01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">恳求;哀求</label>
+<input class="target" name="beseech" placeholder="b" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">bi-ˈsēch</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/beseec01.mp3"></audio>
+</div>
+</div>
+</body>
