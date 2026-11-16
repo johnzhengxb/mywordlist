@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<head>
+<script class="hotkeys">
+   // Add HotKeys;
+        function AddHotKeys() {
+                document.addEventListener('keydown', function(event) {
+                // Check if Ctrl (or Cmd on Mac) and the 's' key are pressed
+                if (event.key === 'Enter') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+
+                if (event.key === 'ArrowRight') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('next-btn').click(); // Trigger the button click
+                }
+
+                if (event.key === 'ArrowLeft') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.getElementById('prev-btn').click(); // Trigger the button click
+                }
+
+                if (event.key === ' ') {
+                        event.preventDefault(); // Prevent the browser's default "Save Page" action
+                        document.querySelector("div.main-container.page-item.active").getElementsByClassName("custom-play-btn")[0].click();
+                }
+                });
+                console.log ("hotkey assigned")
+        }
+
+        document.addEventListener('DOMContentLoaded', AddHotKeys())
+  </script>
+<style class="audio-player">
+
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+                    display: flex;
+                    align-items: center;
+                    gap: 1px;
+                    margin-bottom: 12px;
+                    margin-top: 12px;
+                    padding: 1px 1px;
+                    border-radius: 12px;
+                    max-width: 100%;
+            }
+
+        button.custom-play-btn {
+                height: 60px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<style>
+
+    div.phonetics-syllables-entry {
+        display: none;
+    }
+
+    /* Optional basic styling for buttons */
+    .word-syllables-entry {
+        display: flex;
+        gap: 2px; 
+        border-radius: 8px;
+        background-color: rgb(25, 39, 39);
+        padding-left: 2rem;
+    }
+    .word-syllables-entry button {
+            border-radius: 6px;
+            font-size:2rem !important;
+            margin: 10px 0px;
+            padding: 1px 4px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background-color: #efe8e8;
+            transition: background-color 0.2s;
+        }
+</style>
+<style class="Pagination">
+   html, body {
+        overflow-y:scroll !important; /* Keep vertical scrolling bar*/
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+    
+    div.pagination-controls {
+        width: 100% !important;
+        font-size: 1 rem !important;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        padding-right: 30px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        z-index: 1000; /* Keeps it above other elements */
+     }
+
+   #prev-btn, #next-btn {
+        width: 25%;
+        height: 60px;
+        border-radius: 8px;
+        background-color: darkgreen;
+   }
+
+   #page-indicator {
+        display: inline-block;
+        padding-left: 10%;
+        text-align:center;
+        margin-left: auto;
+        margin-right: auto;
+   }
+
+   #next-btn {
+        margin-left: auto; /* 下一页按钮靠右对齐*/
+   }
+
+   .page-item {
+        display: none;  /* Hide all items by default */
+    }
+
+   .page-item.active {
+        display: block; /* Only show items belonging to the active page */
+        height: 100% !important;
+    }
+  </style>
+<style class="Heading">
+   h1 {
+          width: 100% !important;
+          max-height: fit-content  !important;
+          padding: 2rem !important;
+          margin-bottom: 12px !important;
+          margin-top: 36px !important;
+          font-size: 3rem  !important;
+          background-color: darkgreen;
+          border-radius: 8px;
+        }
+</style>
+<link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions.1f89efcf6947f2d77ef5.css" media="screen" rel="stylesheet"/>
+<link href="https://merriam-webster.com/assets/mw/dist/compiled/css/style-dsp-redesign-definitions-defer.ad5d4ce4a1782dba8842.css" onload="this.onload=null;this.rel='stylesheet'" rel="stylesheet"/>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<script class="Syllabification">
+    document.addEventListener('DOMContentLoaded', () => {
+    // 1. Select all buttons inside the specific container
+    
+    const buttons = document.querySelectorAll('.word-syllables-entry button');
+
+    // 2. Loop through each button and track its index position
+    buttons.forEach((button, index) => {
+        button.addEventListener('mousedown', () => {
+            if (button.className === "stress") {
+                button.style.backgroundColor = 'green';
+            } else {
+            // For all other buttons
+                button.style.backgroundColor = 'red';
+            }
+        });
+    });
+    buttons.forEach((button, index) => {
+    button.addEventListener('mouseup', () => {
+            if (button.className === "stress") {
+                button.style.backgroundColor = 'green';
+            } else {
+            // For all other buttons
+                button.style.backgroundColor= "#efe8e8"
+            }
+        });
+    });
+})
+</script>
+<script class="Pagination">
+   document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('.page-item');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const pageIndicator = document.getElementById('page-indicator');
+
+        let currentPage = 1;
+        const itemsPerPage = 1; // Change this to how many items you want per page
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+
+        function showPage(page) {
+
+
+        if(page>totalPages) {page=1};// 循环
+        currentPage = page;
+
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+
+        items.forEach((item, index) => {
+        if (index >= start && index < end) {
+                item.classList.add('active');
+             //   item.getElementsByTagName("audio")[0].play();
+        } else {
+                item.classList.remove('active');
+        }
+        });
+
+        // Update indicator and button states
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) showPage(currentPage - 1);
+        });
+
+        nextBtn.addEventListener('click', () => {
+            showPage(currentPage + 1);
+        });
+
+        // Initialize first page view
+        showPage(1);
+
+        });
+  </script>
+</head>
+<body>
+<div class="main-container page-item">
+<h1>mistral</h1>
+<div class="word-syllables-entry">
+<button class="stress">mis</button>
+<button class="unstress">tral</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmi-strəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mistra01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>soteriological</h1>
+<div class="word-syllables-entry">
+<button class="unstress">so</button>
+<button class="unstress">te</button>
+<button class="unstress">ri</button>
+<button class="stress">o</button>
+<button class="unstress">lo</button>
+<button class="unstress">gy</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">sō-ˌtir-ē-ˈä-lə-jē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/soteri01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>reconnoiter</h1>
+<div class="word-syllables-entry">
+<button class="unstress">re</button>
+<button class="unstress">con</button>
+<button class="stress">noi</button>
+<button class="unstress">ter</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌrē-kə-ˈnȯi-tər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/reconn02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>Bric-à-brac</h1>
+</div>
+<div class="main-container page-item">
+<h1>epithelium</h1>
+<div class="word-syllables-entry">
+<button class="unstress">e</button>
+<button class="unstress">pi</button>
+<button class="stress">the</button>
+<button class="unstress">li</button>
+<button class="unstress">um</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-pə-ˈthē-lē-əm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/epithe05.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>eclair</h1>
+</div>
+<div class="main-container page-item">
+<h1>rejoinder</h1>
+<div class="word-syllables-entry">
+<button class="unstress">re</button>
+<button class="stress">join</button>
+<button class="unstress">der</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ri-ˈjȯin-dər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rejoin02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>Guano</h1>
+<div class="word-syllables-entry">
+<button class="stress">gua</button>
+<button class="unstress">no</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgwä-(ˌ)nō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/guano001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>maelstrom</h1>
+<div class="word-syllables-entry">
+<button class="stress">mael</button>
+<button class="unstress">strom</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmāl-strəm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/maelst01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>melancholia</h1>
+<div class="word-syllables-entry">
+<button class="unstress">me</button>
+<button class="unstress">lan</button>
+<button class="stress">cho</button>
+<button class="unstress">lia</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌme-lən-ˈkō-lē-ə</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/melanc01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>falconry</h1>
+<div class="word-syllables-entry">
+<button class="stress">fal</button>
+<button class="unstress">con</button>
+<button class="unstress">ry</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfal-kən-rē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/falcon07.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>Goshawk</h1>
+<div class="word-syllables-entry">
+<button class="stress">gos</button>
+<button class="unstress">hawk</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgäs-ˌhȯk</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/goshaw01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>gazebo</h1>
+<div class="word-syllables-entry">
+<button class="unstress">ga</button>
+<button class="stress">ze</button>
+<button class="unstress">bo</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">gə-ˈzē-(ˌ)bō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/gazebo01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>scramble</h1>
+<div class="word-syllables-entry">
+<button class="stress">scram</button>
+<button class="unstress">ble</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈskram-bəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/scramb01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>keystone</h1>
+<div class="word-syllables-entry">
+<button class="stress">key</button>
+<button class="unstress">stone</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈkē-ˌstōn</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/k/keysto01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>feral</h1>
+<div class="word-syllables-entry">
+<button class="stress">fe</button>
+<button class="unstress">ral</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfir-əl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/feral002.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>mongrel</h1>
+<div class="word-syllables-entry">
+<button class="stress">mon</button>
+<button class="unstress">grel</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmäŋ-grəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mongre02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>mnemonic</h1>
+<div class="word-syllables-entry">
+<button class="unstress">mne</button>
+<button class="stress">mo</button>
+<button class="unstress">nic</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ni-ˈmä-nik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mnemon01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>mitosis</h1>
+<div class="word-syllables-entry">
+<button class="unstress">mi</button>
+<button class="stress">to</button>
+<button class="unstress">sis</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">mī-ˈtō-səs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mitosi01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<h1>meiosis</h1>
+<div class="word-syllables-entry">
+<button class="unstress">mei</button>
+<button class="stress">o</button>
+<button class="unstress">sis</button>
+</div>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">mī-ˈō-səs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/meiosi01.mp3"></audio>
+</div>
+</div>
+<div class="pagination-controls col-lg-7 col-xl-8 left-content">
+<button id="prev-btn" type="button">
+   ◀ Previous
+  </button>
+<span id="page-indicator">
+   Page 1 of 3
+  </span>
+<button id="next-btn" type="button">
+   Next ▶
+  </button>
+</div>
+</body>

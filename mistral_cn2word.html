@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=0.8" name="viewport"/>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 440px;
+            margin:12px 12px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 8px 8px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="TextInput">
+        /* Select the text box */
+        div.page-item {
+            width: 400px;
+        }
+
+        label[for="username"] {
+            border-radius:8px;
+            display:block;
+            width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            overflow-wrap: normal;
+            background-color: beige;
+        }
+
+        hr {
+            margin-right: 12px;
+            margin-left:12px;
+            width: 440px;
+        }
+
+        input[type="text"] {
+            display:block;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;;            
+            width: 100%;
+            max-width: 400px;
+            margin:12px 16px;
+            padding: 12px 16px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1; /* Soft gray border */
+            border-radius: 8px;        /* Modern rounded corners */
+            outline: none;
+            transition: all 0.15s ease-in-out; /* Smooth transition for focus effects */
+        }
+
+        input.correct {
+            background-color: aquamarine;
+            transition:none;
+        }
+        /* Modern focus state (glow/border color change) */
+        input[type="text"]:focus {
+            border-color: #3b82f6;     /* Vibrant modern blue */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); /* Soft outer glow */
+        }
+
+        /* Placeholder styling */
+        input[type="text"]::placeholder {
+            color: #94a3b8;
+        }
+</style>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all inputs once and loop through them
+        document.querySelectorAll('input').forEach(inputField => {
+            inputField.addEventListener('input', (event) => {
+                const field = event.target;
+                // Compare value to name and toggle the "correct" class
+                const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (field.value.toLowerCase() ===cleanWord.toLowerCase()) {
+                    field.classList.add("correct");
+                    field.value=field.name
+                } else {
+                    field.classList.remove("correct");
+                }
+            });
+        });
+    });
+    
+    document.addEventListener("DOMContentLoaded", () => {
+    // Collect all input elements into an array for easy index tracking
+    const inputs = Array.from(document.querySelectorAll('input'));
+
+    inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+            // Check if the pressed key is "Enter"
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault(); 
+                inputField.value=inputField.name
+                inputField.classList.add("correct")
+            }else{
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents accidental form submission
+                // Find the next input in the array and focus it
+                const nextInput = inputs[index + 1];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+            }
+
+
+        });
+    });
+
+
+    });
+</script>
+</head>
+<body>
+<div class="main-container page-item">
+<label for="username">密史脱拉风（从法国南部吹向地中海的一种干冷北风）</label>
+<input class="target" name="mistral" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmi-strəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mistra01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（士兵或军用飞机）侦察，搜索（情报）</label>
+<input class="target" name="reconnoiter" placeholder="r" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌrē-kə-ˈnȯi-tər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/reconn02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（不值钱的）小装饰品，小摆设</label>
+<input class="target" name="Bric-à-brac" placeholder="B" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈbri-kə-ˌbrak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/bric_a01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">上皮，上皮组织</label>
+<input class="target" name="epithelium" placeholder="e" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌe-pə-ˈthē-lē-əm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/epithe05.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（通常指上面涂巧克力的）长条泡芙，奶油松饼</label>
+<input class="target" name="eclair" placeholder="e" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ē-ˈkler</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/e/eclai01v.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">回答;反驳</label>
+<input class="target" name="rejoinder" placeholder="r" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ri-ˈjȯin-dər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/r/rejoin02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">海鸟粪</label>
+<input class="target" name="Guano" placeholder="G" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgwä-(ˌ)nō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/guano001.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">大动乱;骚乱;极度混乱</label>
+<input class="target" name="maelstrom" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmāl-strəm</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/maelst01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">抑郁症</label>
+<input class="target" name="melancholia" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌme-lən-ˈkō-lē-ə</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/melanc01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">放鹰狩猎;猎鹰训练</label>
+<input class="target" name="falconry" placeholder="f" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfal-kən-rē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/falcon07.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">苍鹰</label>
+<input class="target" name="Goshawk" placeholder="G" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈgäs-ˌhȯk</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/goshaw01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（通常指花园中的）凉亭，观景亭;眺台</label>
+<input class="target" name="gazebo" placeholder="g" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">gə-ˈzē-(ˌ)bō</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/g/gazebo01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">（急速而艰难地）移动;爬;攀登</label>
+<input class="target" name="scramble" placeholder="s" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈskram-bəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/scramb01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">拱顶石;塞缝石</label>
+<input class="target" name="keystone" placeholder="k" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈkē-ˌstōn</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/k/keysto01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">野生的（尤指原为家养的动物）</label>
+<input class="target" name="feral" placeholder="f" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfir-əl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/feral002.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">杂种狗</label>
+<input class="target" name="mongrel" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈmäŋ-grəl</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mongre02.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">帮助记忆的诗歌（或词句等）;助记符号;助记顺口溜</label>
+<input class="target" name="mnemonic" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ni-ˈmä-nik</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mnemon01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">有丝分裂（细胞分裂过程，一个细胞分裂成两个相同的细胞，每一个都含有与母细胞相同数目的染色体）</label>
+<input class="target" name="mitosis" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">mī-ˈtō-səs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/mitosi01.mp3"></audio>
+</div>
+</div>
+<div class="main-container page-item">
+<label for="username">减数分裂（发生在有性生殖生物中的细胞分裂过程，一个细胞分为四个配子，每个拥有不同的混合染色体，一半存于原细胞中）</label>
+<input class="target" name="meiosis" placeholder="m" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">mī-ˈō-səs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/m/meiosi01.mp3"></audio>
+</div>
+</div>
+</body>
