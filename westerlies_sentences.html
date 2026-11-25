@@ -1,0 +1,676 @@
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=2.0" name="viewport"/>
+<link href="favicon.png" rel="icon" type="image/png"/>
+<title>My Wordlist</title>
+<style class="audio-player">
+
+   html, body {
+        
+        height: 100%; /* Locks height to the viewport */
+        background-color: transparent !important;
+        }
+
+    .audio-card {
+            display:block;
+            width: 400px;
+            margin:12px 0px;
+            margin-bottom: 2px;
+            padding:0px 0px;
+            }
+
+    button.custom-play-btn {
+                height: 40px;
+                background-color: #0c427b;
+                color: white;
+                width: 100%;
+                border: none;
+                border-radius: 10px;
+                padding: 4px 4px;
+                font-size: 1rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+        }
+
+        .custom-play-btn:hover {
+            background-color: #0056b3;
+        }
+
+        span.pr {
+            display:none;
+        }
+</style>
+<script class="Audio-player">
+   document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.audio-card').forEach(card => {
+        const audio = card.querySelector('audio');
+        const btn = card.querySelector('.custom-play-btn');
+
+        // Safety check in case elements are missing
+        if (!audio || !btn) return;
+
+        btn.addEventListener('click', () => {
+
+          // Toggle current audio playback
+          if (audio.paused) {
+            audio.play().catch(error => {
+              console.log("Playback failed:", error);
+            });
+            btn.getElementsByClassName("pr")[0].style.display="inline";
+          } else {
+            audio.pause();
+            // btn.textContent = '▶ Play';
+          }
+        });
+
+        // Reset button text back to "Play" when the audio clip ends naturally
+        audio.addEventListener('ended', () => {
+          //btn.textContent = '▶ Play';
+        });
+      });
+    });
+</script>
+<style class="dustbin">
+    footer {
+
+      width: 500px;
+      display: none;
+    }
+
+    footer.active {
+      display: block;
+    }
+
+    /* 1. Make sure the div is positioned relative so children can absolute-position inside it */
+    .main-item {
+      position: relative;
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      min-height: 80px;
+    }
+
+    /* 2. Style and position the close button at the bottom-right corner */
+    .close-btn {
+      position: absolute;
+      bottom: 15px;
+      right: 10px;
+      font-size: 0.5rem;
+      background-color: #9d97a1;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      height: 30px;
+    }
+
+    .close-btn:hover {
+      background-color: #cc0000;
+    }
+</style>
+<style class="TextInput">
+    input[type="text"] {
+      display: block;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+      ;
+      width: 100%;
+      max-width: 400px;
+
+      padding: 4px 4px;
+      padding-bottom: 6px;
+      padding-left: 0.5rem;
+      font-size: 1.5rem;
+      font-family: inherit;
+      color: #1e293b;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      /* Soft gray border */
+      border-radius: 8px;
+      /* Modern rounded corners */
+      outline: none;
+      transition: all 0.15s ease-in-out;
+      /* Smooth transition for focus effects */
+    }
+
+    input.correct {
+      background-color: aquamarine;
+      transition: none;
+    }
+
+    /* Modern focus state (glow/border color change) */
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+      /* Vibrant modern blue */
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+      /* Soft outer glow */
+    }
+
+    /* Placeholder styling */
+    input[type="text"]::placeholder {
+      color: #94a3b8;
+    }
+  </style>
+<style>
+    body {
+      font-family: "Microsoft Yahei";
+      width: 480px;
+    }
+
+    span.ex-sent {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      line-height: 1.8rem;
+    }
+
+    span.dtText::before {
+      content: '🔗';
+      font-size: 0.8rem
+    }
+
+    span.dtText {
+      color: darkblue;
+    }
+
+    span.mwtwi {
+      text-decoration: underline green;
+      text-underline-offset: 6px;
+      color: rgba(0, 128, 0, 0);
+      display: inline-block;
+    }
+
+    span.mwtwi.show {
+      color: rgba(0, 128, 0, 1);
+    }
+
+    span.mwtwi::first-letter {
+      color: green !important;
+    }
+
+    div.main-item {
+      width: 480px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+      $("span.mwtwi").click(function () {
+        $(this).toggleClass("show")
+      });
+    });
+  </script>
+<script class="checkSpelling">
+    document.addEventListener("DOMContentLoaded", () => {
+      // Select all inputs once and loop through them
+      document.querySelectorAll('input').forEach(inputField => {
+        inputField.addEventListener('input', (event) => {
+          const field = event.target;
+          // Compare value to name and toggle the "correct" class
+          const cleanWord = field.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          if (field.value.toLowerCase() === cleanWord.toLowerCase()) {
+            field.classList.add("correct");
+            field.value = field.name
+          } else {
+            field.classList.remove("correct");
+          }
+        });
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // Collect all input elements into an array for easy index tracking
+      const inputs = Array.from(document.querySelectorAll('input'));
+
+      inputs.forEach((inputField, index) => {
+        inputField.addEventListener('keydown', (event) => {
+          // Check if the pressed key is "Enter"
+          if (event.ctrlKey && event.key === 'Enter') {
+            event.preventDefault();
+            inputField.value = inputField.name
+            inputField.classList.add("correct")
+          } else {
+            if (event.key === 'Enter') {
+              event.preventDefault(); // Prevents accidental form submission
+              // Find the next input in the array and focus it
+              const nextInput = inputs[index + 1];
+              if (nextInput) {
+                nextInput.focus();
+              }
+            }
+          }
+
+
+        });
+      });
+    });
+  </script>
+<script class="dustbin">
+    window.onload = function () {
+      // 1. Initialize noshowlist using 'let' so it can be reassigned
+      let noshowlist = [];
+      let savedNote = localStorage.getItem("noshowlist");
+
+      if (savedNote) {
+        try {
+          noshowlist = JSON.parse(savedNote);
+        } catch (e) {
+          console.error("Failed to parse noshowlist from localStorage", e);
+        }
+      }
+
+      // 2. Select containers and all exercise/main-item divs
+      const mainItems = document.querySelectorAll('.main-item');
+      const dustbin = document.querySelector("footer");
+      const displayshelf = document.querySelector("main");
+
+      // 3. Loop through saved hidden list and move matching items to footer on load
+      noshowlist.forEach(hiddenText => {
+        mainItems.forEach(div => {
+          const targetEl = div.querySelector(".ex-sent.first-child.t.no-aq.sents");
+          if (targetEl) {
+            let egtext = targetEl.innerText;
+            egtext = egtext.replaceAll("\n", "").replace(/\s+/g, " ").trim();
+            if (egtext === hiddenText) {
+              dustbin.appendChild(div);
+            }
+          }
+        });
+      });
+
+      // 4. Attach close/restore buttons to each main-item
+      mainItems.forEach(function (mainitemDiv) {
+        const btn = document.createElement('button');
+        btn.className = "close-btn";
+
+        const targetEl = mainitemDiv.querySelector(".ex-sent.first-child.t.no-aq.sents");
+        let egtext = "";
+        if (targetEl) {
+          egtext = targetEl.innerText.replaceAll("\n", "").replace(/\s+/g, " ").trim();
+        }
+
+        // Set initial button text based on whether it's already hidden
+        if (noshowlist.includes(egtext)) {
+          btn.innerText = "+";
+        } else {
+          btn.innerText = "×";
+        }
+
+        btn.addEventListener('click', function () {
+          if (!targetEl) return;
+
+          if (btn.innerText === "×") {
+            // Move to footer and save to noshowlist
+            dustbin.appendChild(mainitemDiv);
+            if (!noshowlist.includes(egtext)) {
+              noshowlist.push(egtext);
+            }
+            localStorage.setItem("noshowlist", JSON.stringify(noshowlist));
+            btn.innerText = "+";
+          } else {
+            // Move back to main shelf and remove from noshowlist
+            
+            visibledivs=displayshelf.querySelectorAll("div.main-item")
+            if (visibledivs.length==0){
+              console.log("visibledivs.length==0")
+              displayshelf.appendChild(mainitemDiv);
+            }else{
+              target_id=mainitemDiv.dataset.id;
+              console.log(target_id)
+              for (let i = 0; i < visibledivs.length; i++) {
+                  const currentItem = visibledivs[i];
+                  // Get the value of the data-id attribute (e.g., data-id="006")
+                  const dataId = currentItem.dataset.id;
+
+                  // Compare dataId with target_id
+                  if (dataId > target_id) {
+                    console.log("move before")
+                    currentItem.before(mainitemDiv);
+                    break
+                  }
+              }
+            }
+            
+            noshowlist = noshowlist.filter(item => item !== egtext);
+            localStorage.setItem("noshowlist", JSON.stringify(noshowlist));
+            btn.innerText = "×";
+          }
+        });
+
+        // Append button inside the loop correctly
+        mainitemDiv.appendChild(btn);
+      });
+    };
+
+    function restoreall() {
+      const displayshelf = document.querySelector("main");
+      document.querySelectorAll("div.main-item").forEach(div => {
+        displayshelf.appendChild(div);
+        // Reset buttons if they exist
+        const btn = div.querySelector(".close-btn");
+        if (btn) btn.innerText = "×";
+      });
+      localStorage.removeItem("noshowlist");
+    }
+
+    function showhidedustbin() {
+      document.querySelector("footer").classList.toggle("active")
+      btt = document.getElementById('ShowHideDustbin')
+      if (btt.innerText == "Show Dustbin") {
+        btt.innerText = "Hide Dustbin";
+      } else {
+        btt.innerText = "Show Dustbin";
+      }
+    }
+  </script>
+</head>
+<body>
+<div class="main-item" data-id="001">
+<span class="dtText">situated toward or belonging to the west</span>
+<span class="ex-sent first-child t no-aq sents">the <span class="mwtwi">westerly</span> end of the farm</span>
+<input name="westerly" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈwe-stər-lē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/w/wester02.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="002">
+<span class="dtText">coming from the west</span>
+<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">westerly</span> breeze</span>
+<input name="westerly" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈwe-stər-lē</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/w/wester02.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="003">
+<span class="dtText"><span class="text-uppercase">attach</span></span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">tack</span> on some sequins for pizzazz</span></span>
+<input name="tack" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="004">
+<span class="dtText">to fasten or affix with tacks </span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">tack</span> a notice to a pole</span> </span>
+<input name="tack" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="005">
+<span class="dtText">to add (a rider) to a parliamentary bill</span>
+<span class="ex-sent first-child t no-aq sents">provisions <span class="mwtwi">tacked</span> to an appropriation bill</span>
+<input name="tacked" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="006">
+<span class="dtText">to tack a sailing ship</span>
+<span class="ex-sent first-child t no-aq sents">We <span class="mwtwi">tacked</span> repeatedly as we sailed toward the harbor.</span>
+<input name="tacked" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="007">
+<span class="dtText">to change to an opposite tack by turning the bow to the wind</span>
+<span class="ex-sent first-child t no-aq sents">a ship that <span class="mwtwi">tacks</span> easily</span>
+<input name="tacks" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="008">
+<span class="dtText">to follow a zigzag course</span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">tacked</span> through the crowd</span></span>
+<input name="tacked" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="009">
+<span class="dtText">to follow a course against the wind by a series of tacks</span>
+<span class="ex-sent first-child t has-aq sents">Boredom was the chief enemy as the ships <span class="mwtwi">tacked</span> to and fro.</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="auth">— Nigel Calder</span></span></span>
+<input name="tacked" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="010">
+<span class="dtText">to modify one's policy or attitude abruptly</span>
+<span class="ex-sent first-child t has-aq sents">With the coming of Ronald Reagan to power, Nixon <span class="mwtwi">tacked</span> hard right—an old instinct.</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="auth">— Sidney Blumenthal</span></span></span>
+<input name="tacked" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈtak</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/t/tack0001.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="011">
+<span class="dtText">to turn off to one side <strong class="mw_t_bc">: </strong><span class="text-uppercase">shift</span></span>
+<span class="ex-sent first-child t no-aq sents">was <span class="mwtwi">shunted</span> aside</span>
+<input name="shunted" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈshənt</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/shunt001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="012">
+<span class="dtText"><span class="text-uppercase">shuttle</span></span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">shunted</span> the missiles from shelter to shelter</span></span>
+<input name="shunted" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈshənt</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/shunt001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="013">
+<span class="dtText">to travel back and forth</span>
+<span class="ex-sent first-child t no-aq sents"><span class="mw_t_sp"><span class="mwtwi">shunted</span> between the two towns</span></span>
+<input name="shunted" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈshənt</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/s/shunt001.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="014">
+<span class="dtText">a decorative chain or strip hanging between two points</span>
+<span class="ex-sent first-child t no-aq sents">walls decorated with <span class="mwtwi">festoons</span> of flowers</span>
+<input name="festoons" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">fe-ˈstün</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/festoo01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="015">
+<span class="dtText">a carved, molded, or painted ornament representing a decorative chain</span>
+<span class="ex-sent first-child t no-aq sents">Around the mirror were carved <span class="mwtwi">festoons</span> of grapevines.</span>
+<input name="festoons" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">fe-ˈstün</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/festoo01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="016">
+<span class="dtText">something (such as a never-ending cycle) that is likened to or suggestive of the Ouroboros symbol</span>
+<span class="ex-sent first-child t has-aq sents">Trauma is a time traveller, an <span class="mwtwi">ouroboros</span> that reaches back and devours everything that came before.</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="auth">— Junot Díaz</span></span></span>
+<input name="ouroboros" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌju̇r-ō-ˈbȯr-əs</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/o/ouroboros_1.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="017">
+<span class="dtText">fruitful in offspring or vegetation <strong class="mw_t_bc">: </strong><span class="text-uppercase">prolific</span></span>
+<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">fecund</span> breed of cattle</span>
+<input name="fecund" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfe-kənd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fecund02.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="018">
+<span class="dtText">intellectually productive or inventive to a marked degree</span>
+<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">fecund</span> imagination</span>
+<input name="fecund" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈfe-kənd</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/f/fecund02.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="019">
+<span class="dtText">to speak or cry out with derision or mockery</span>
+<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">jeering</span> mob</span>
+<input name="jeering" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈjir</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/j/jeer0001.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="020">
+<span class="dtText">to deride with mocking and insulting remarks or sounds <strong class="mw_t_bc">: </strong><span class="text-uppercase">taunt</span></span>
+<span class="ex-sent first-child t no-aq sents">was <span class="mwtwi">jeered</span> by the crowd when he tried to speak</span>
+<input name="jeered" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈjir</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/j/jeer0001.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="021">
+<span class="dtText">a slight knowledge or vague notion</span>
+<span class="ex-sent first-child t has-aq sents">had not the faintest <span class="mwtwi">inkling</span> of what it was all about</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="auth">— H. W. Carter</span></span></span>
+<input name="inkling" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈiŋ-kliŋ</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/inklin01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="022">
+<span class="dtText">a slight indication or suggestion <strong class="mw_t_bc">: </strong><span class="text-uppercase">hint</span>, <span class="text-uppercase">clue</span></span>
+<span class="ex-sent first-child t has-aq sents">there was no path—no <span class="mwtwi">inkling</span> even of a track</span><span class="ex-sent aq has-aq sents"><span class="aq"><span class="source"> — <em class="mw_t_it">New Yorker</em></span></span></span>
+<input name="inkling" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˈiŋ-kliŋ</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/i/inklin01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="023">
+<span class="dtText">one who understands the details, technique, or principles of an art and is competent to act as a critical judge </span>
+<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">connoisseur</span> of music    </span>
+<input name="connoisseur" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌkä-nə-ˈsər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/connoi01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="024">
+<span class="dtText">one who enjoys with discrimination and appreciation of subtleties</span>
+<span class="ex-sent first-child t no-aq sents">a <span class="mwtwi">connoisseur</span> of fine wines</span>
+<input name="connoisseur" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">ˌkä-nə-ˈsər</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/c/connoi01.mp3"></audio>
+</div>
+</div>
+<div class="main-item" data-id="025">
+<span class="dtText">an authoritative order <strong class="mw_t_bc">: </strong><span class="text-uppercase">command</span></span>
+<span class="ex-sent first-child t no-aq sents">The meeting was called at the senator's <span class="mwtwi">behest</span>.</span>
+<input name="behest" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">bi-ˈhest</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/behest01.mp3"></audio>
+</div>
+</div><div class="main-item" data-id="026">
+<span class="dtText">an urgent prompting</span>
+<span class="ex-sent first-child t no-aq sents">At the <span class="mwtwi">behest</span> of her friends, she read the poem aloud.</span>
+<input name="behest" type="text"/>
+<div class="audio-card f">
+<button class="custom-play-btn" type="button">
+<span>🔊</span>
+<span class="pr fullwidth">bi-ˈhest</span>
+</button>
+<audio src="https://media.merriam-webster.com/audio/prons/en/us/mp3/b/behest01.mp3"></audio>
+</div>
+</div>
+<main>
+</main>
+<div id="controlpanel">
+<button id="ShowHideDustbin" onclick="showhidedustbin()">Show Dustbin</button>
+</div>
+<footer>
+</footer>
+</body>
